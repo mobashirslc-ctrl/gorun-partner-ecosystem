@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Panel - GORUN</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #f1f5f9; display: flex; }
+        .sidebar { width: 260px; height: 100vh; background: white; border-right: 1px solid #e2e8f0; padding: 30px; position: fixed; }
+        .main { margin-left: 320px; padding: 40px; width: 100%; }
+        .logo-s { width: 80px; margin-bottom: 20px; }
+        .badge { background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
+        .box { background: white; padding: 30px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <img src="../logo.png" alt="GORUN" class="logo-s">
+    <h3 id="shopName">Loading...</h3>
+    <p id="catText" style="color: #64748b; font-size: 0.9rem;"></p>
+    <hr>
+    <p>Dashboard</p>
+    <p id="invMenu">Inventory</p>
+    <p>Hire Staff</p>
+    <p style="color:red; cursor:pointer; margin-top:50px;" onclick="logout()">Logout</p>
+</div>
+
+<div class="main">
+    <h1>Welcome, <span id="welcomeName">---</span></h1>
+    <span id="badge" class="badge">Category</span>
+
+    <div id="contentBox" class="box">
+        </div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+    const user = localStorage.getItem('gorun_user');
+    if(!user) window.location.href = "../index.html";
+
+    db.ref('gorun_merchants/' + user).once('value').then(snap => {
+        const d = snap.val();
+        document.getElementById('shopName').innerText = d.shopName;
+        document.getElementById('welcomeName').innerText = d.shopName;
+        document.getElementById('badge').innerText = d.category;
+        document.getElementById('catText').innerText = d.category + " Merchant";
+
+        const box = document.getElementById('contentBox');
+        if(d.category === "Corporate") {
+            box.innerHTML = "<h2>Corporate Staffing Dashboard</h2><p>Hire skilled professionals for your office on an hourly basis.</p>";
+            document.getElementById('invMenu').style.display = 'none';
+        } else {
+            box.innerHTML = "<h2>" + d.category + " Inventory</h2><p>Manage your stocks and local logistics from here.</p>";
+        }
+    });
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "../index.html";
+    }
+</script>
+</body>
+</html>

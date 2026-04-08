@@ -3,81 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GORUN | Registration</title>
+    <title>GORUN | Partner Portal</title>
     <style>
+        :root { --main-green: #008f51; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        .wrapper { display: flex; min-height: 100vh; background-color: #fff; }
 
-        /* Left side Banner */
-        .brand-side {
-            flex: 1.2;
-            background-color: #f0fdf4; /* Light green tint */
+        body {
+            /* পুরো পেজ গ্রিন ব্যাকগ্রাউন্ড */
+            background: linear-gradient(135deg, #008f51 0%, #004d2c 100%);
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 40px;
-        }
-        .brand-side img {
-            width: 100%;
-            max-width: 600px;
-            border-radius: 30px;
-            object-fit: cover;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* Right side Form */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 1150px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px); /* Glassmorphism ইফেক্ট */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        /* Left Side: Design Section with Border */
+        .brand-side {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .bordered-design {
+            width: 100%;
+            height: 550px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .bordered-design img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Right Side: White Registration Box */
         .form-side {
-            flex: 0.8;
+            flex: 1;
+            background: #ffffff;
+            padding: 40px;
             display: flex;
             flex-direction: column;
-            padding: 60px;
-            position: relative;
         }
 
-        .logo-top { text-align: right; margin-bottom: 40px; }
-        .logo-top img { width: 150px; }
+        .logo-area { text-align: center; margin-bottom: 25px; }
+        .logo-area img { width: 80px; margin-bottom: 5px; }
+        .logo-area h1 { color: var(--main-green); font-size: 26px; font-weight: 800; }
 
-        .form-container { width: 100%; max-width: 400px; margin: 0 auto; }
-        .form-header { text-align: center; margin-bottom: 30px; }
-        .form-header h2 { font-size: 24px; color: #334155; }
-        .form-header h2 span { color: #008f51; font-weight: 700; }
-
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #475569; }
+        .form-container { overflow-y: auto; max-height: 500px; padding-right: 10px; }
+        .input-row { display: flex; gap: 15px; margin-bottom: 15px; }
+        .input-group { flex: 1; margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #555; }
         .input-group input, .input-group select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            outline: none;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
         }
 
         .submit-btn {
             width: 100%;
-            padding: 14px;
-            background-color: #008f51; /* GORUN Green */
+            padding: 15px;
+            background: var(--main-green);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 10px;
+            transition: 0.3s;
         }
+        .submit-btn:hover { background: #007341; }
 
         .footer-links {
-            position: absolute;
-            bottom: 20px;
-            width: calc(100% - 120px);
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: #94a3b8;
+            color: #999;
         }
-        .footer-links a { color: #008f51; text-decoration: none; margin-left: 10px; }
 
-        @media (max-width: 1024px) {
+        /* Responsive */
+        @media (max-width: 992px) {
             .brand-side { display: none; }
-            .form-side { flex: 1; padding: 30px; }
+            .wrapper { max-width: 500px; }
         }
     </style>
 </head>
@@ -85,41 +105,71 @@
 
 <div class="wrapper">
     <div class="brand-side">
-        <img src="assets/img/banner.jpg" alt="GORUN Banner">
+        <div class="bordered-design">
+            <img src="assets/img/banner.jpg" alt="Partner Banner">
+        </div>
     </div>
 
     <div class="form-side">
-        <div class="logo-top">
-            <img src="assets/img/logo.png" alt="GORUN">
+        <div class="logo-area">
+            <img src="assets/img/logo.png" alt="GORUN Logo">
+            <h1>GORUN</h1>
         </div>
 
         <div class="form-container">
-            <div class="form-header">
-                <h2>Create <span>partner</span> account</h2>
-            </div>
-
             <form>
                 <div class="input-group">
-                    <label>Business Name *</label>
-                    <input type="text" placeholder="Shop Name" required>
+                    <label>Merchant Name *</label>
+                    <input type="text" placeholder="e.g. Gorun Limited" required>
                 </div>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Contact No *</label>
+                        <input type="tel" placeholder="01XXX-XXXXXX" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Merchant Type *</label>
+                        <select required>
+                            <option value="">Select Type</option>
+                            <option>Groceries</option>
+                            <option>Pharmacy</option>
+                            <option>Food</option>
+                            <option>Fashion</option>
+                            <option>Electronics</option>
+                            <option>Corporate</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="input-group">
-                    <label>Phone Number *</label>
-                    <input type="tel" placeholder="01XXX-XXXXXX" required>
+                    <label>Address *</label>
+                    <input type="text" placeholder="Full Business Address" required>
                 </div>
-                <div class="input-group">
-                    <label>Password *</label>
-                    <input type="password" placeholder="Min. 8 characters" required>
+
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Create Password *</label>
+                        <input type="password" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Confirm Password *</label>
+                        <input type="password" required>
+                    </div>
                 </div>
-                <button type="submit" class="submit-btn">Be a partner</button>
+
+                <div style="font-size: 12px; color: #666; display: flex; gap: 10px; align-items: flex-start; margin: 15px 0;">
+                    <input type="checkbox" required style="margin-top: 3px;">
+                    <span>I agree to the <a href="#" style="color:var(--main-green)">Terms & Conditions</a> and <a href="#" style="color:var(--main-green)">Privacy Policy</a>.</span>
+                </div>
+
+                <button type="submit" class="submit-btn">Be a Partner</button>
             </form>
         </div>
 
         <div class="footer-links">
-            <span>© 2026 GORUN | All rights reserved</span>
-            <div>
-                <a href="#">Term & Condition</a> | <a href="#">Privacy & Policy</a>
-            </div>
+            <span>© 2026 GORUN</span>
+            <div><a href="#" style="color:#999; text-decoration:none;">Privacy</a> | <a href="#" style="color:#999; text-decoration:none;">Terms</a></div>
         </div>
     </div>
 </div>

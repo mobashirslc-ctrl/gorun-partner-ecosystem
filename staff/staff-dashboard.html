@@ -250,10 +250,16 @@
             }, 1000);
         }
 
-        // Init
+      
+window.onload = function() {
+    if (typeof firebase !== 'undefined') {
         syncWallet();
         trackActiveJob();
         loadJobRequests();
+    } else {
+        console.error("Firebase load hotey somossya hoyeche.");
+    }
+};
     </script>
 </body>
 </html>

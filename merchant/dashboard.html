@@ -3,46 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merchant Dashboard | GORUN</title>
+    <title>GORUN | Unified Merchant Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gorun-green: #008f51; --dark-blue: #1e293b; --light-bg: #f4f7f6; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --bg-gray: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        body { display: flex; background: var(--light-bg); min-height: 100vh; }
+        body { display: flex; background: var(--bg-gray); min-height: 100vh; }
 
-        /* Sidebar Design */
-        .sidebar { width: 260px; background: var(--dark-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; }
-        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-header img { width: 50px; }
+        /* Sidebar Styling */
+        .sidebar { width: 280px; background: var(--dark-blue); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; transition: 0.3s; z-index: 1000; }
+        .sidebar-header { padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-header img { width: 60px; margin-bottom: 10px; }
         
-        .nav-links { flex: 1; padding: 20px 10px; }
+        .nav-links { flex: 1; padding: 20px 15px; overflow-y: auto; }
+        .section-label { font-size: 11px; text-transform: uppercase; color: #475569; margin: 20px 0 10px 10px; font-weight: 800; letter-spacing: 1px; }
+        
         .nav-item { 
-            display: flex; align-items: center; padding: 12px 15px; color: #cbd5e1; 
-            text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: 0.3s; cursor: pointer;
+            display: flex; align-items: center; padding: 12px 15px; color: #94a3b8; 
+            text-decoration: none; border-radius: 10px; margin-bottom: 5px; cursor: pointer; transition: 0.3s;
         }
-        .nav-item i { margin-right: 12px; font-size: 18px; }
+        .nav-item i { width: 25px; font-size: 18px; margin-right: 12px; }
         .nav-item:hover, .nav-item.active { background: var(--gorun-green); color: white; }
 
-        /* Main Content */
-        .main-content { flex: 1; display: flex; flex-direction: column; }
+        /* Main Content Styling */
+        .main-content { flex: 1; margin-left: 280px; display: flex; flex-direction: column; min-width: 0; }
         .top-bar { 
-            background: white; padding: 15px 30px; display: flex; 
-            justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            background: white; padding: 20px 40px; display: flex; 
+            justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
         }
-        .content-body { padding: 30px; }
+        .content-body { padding: 40px; }
 
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 5px solid var(--gorun-green); }
-        .stat-card p { color: #64748b; font-size: 13px; font-weight: 600; }
-        .stat-card h3 { font-size: 24px; margin-top: 5px; color: var(--dark-blue); }
+        /* Stats Card Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .card { 
+            background: white; padding: 30px; border-radius: 20px; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04); border-bottom: 5px solid var(--gorun-green);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card p { color: #64748b; font-size: 14px; font-weight: 600; }
+        .card h3 { font-size: 32px; margin-top: 10px; color: var(--dark-blue); }
 
         .hidden { display: none !important; }
-        
-        .badge { background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+        .badge { background: #dcfce7; color: var(--gorun-green); padding: 5px 12px; border-radius: 30px; font-size: 12px; font-weight: 700; margin-top: 5px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -50,74 +56,143 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <img src="../assets/img/logo.png" alt="GORUN">
-            <h3 style="margin-top:10px;">GORUN Merchant</h3>
+            <h3 style="color: white; letter-spacing: 1px;">GORUN</h3>
+            <span id="shopCat" class="badge">Merchant</span>
         </div>
+        
         <div class="nav-links">
-            <div class="nav-item active"><i class="fa-solid fa-gauge"></i> Overview</div>
+            <div class="nav-item active"><i class="fa-solid fa-house"></i> Overview</div>
             
-            <div id="menuInventory" class="nav-item hidden"><i class="fa-solid fa-boxes-stacked"></i> My Inventory</div>
-            <div id="menuSourcing" class="nav-item hidden"><i class="fa-solid fa-handshake"></i> M2M Sourcing</div>
-            
+            <div id="grp-inventory" class="hidden">
+                <div class="section-label">Product Management</div>
+                <div class="nav-item"><i class="fa-solid fa-boxes-stacked"></i> My Inventory</div>
+                <div id="itm-m2m" class="nav-item hidden"><i class="fa-solid fa-sync"></i> M2M Sourcing</div>
+            </div>
+
+            <div id="grp-finance" class="hidden">
+                <div class="section-label">Business Growth</div>
+                <div class="nav-item"><i class="fa-solid fa-cart-flatbed-suitcase"></i> Wholesale Sourcing</div>
+                <div class="nav-item"><i class="fa-solid fa-chart-pie"></i> Profit/Loss Analytics</div>
+            </div>
+
+            <div id="grp-corporate" class="hidden">
+                <div class="section-label">Company Admin</div>
+                <div class="nav-item"><i class="fa-solid fa-users-gear"></i> Staff Monitoring</div>
+                <div class="nav-item"><i class="fa-solid fa-list-check"></i> Task Manager</div>
+            </div>
+
+            <div class="section-label">Human Resource</div>
             <div class="nav-item"><i class="fa-solid fa-user-tie"></i> Staff Hiring</div>
-            <div class="nav-item"><i class="fa-solid fa-truck-fast"></i> Delivery Tasks</div>
-            <div class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Payments</div>
             
-            <div class="nav-item" onclick="logout()" style="margin-top: 50px; color: #fb7185;"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+            <div id="grp-logistics">
+                <div class="section-label">Logistics</div>
+                <div class="nav-item"><i class="fa-solid fa-truck-fast"></i> Delivery Tasks</div>
+            </div>
+
+            <div class="section-label">Support & Center</div>
+            <div class="nav-item"><i class="fa-solid fa-comment-dots"></i> Complain Box</div>
+            <div class="nav-item"><i class="fa-solid fa-headset"></i> Customer Support</div>
+            
+            <div class="nav-item" onclick="logout()" style="margin-top: 40px; color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.2);">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </div>
         </div>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
             <div>
-                <h4 id="welcomeMsg">Loading...</h4>
-                <span class="badge" id="categoryBadge">Category</span>
+                <h2 id="shopNameDisplay">Dashboard</h2>
+                <p id="merchantStatus" style="font-size: 13px; color: #64748b;">Merchant ID: <span id="idDisplay" style="color: var(--gorun-green); font-weight: 700;"></span></p>
             </div>
-            <div id="merchantID" style="font-weight: 700; color: var(--gorun-green);"></div>
+            <div style="text-align: right;">
+                <p id="currentDate" style="font-weight: 600; color: var(--dark-blue);"></p>
+                <p style="font-size: 12px; color: #94a3b8;">Welcome back, Partner!</p>
+            </div>
         </div>
 
         <div class="content-body">
-            <div class="stats-grid">
-                <div class="stat-card"><p>Total Sales</p><h3>৳ 0.00</h3></div>
-                <div id="statStock" class="stat-card hidden"><p>Low Stock Items</p><h3>0</h3></div>
-                <div class="stat-card"><p>Active Staff</p><h3>0</h3></div>
-                <div class="stat-card"><p>Ongoing Delivery</p><h3>0</h3></div>
-            </div>
+            <div id="overviewCards" class="grid">
+                </div>
 
-            <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; color: #94a3b8;">
-                <i class="fa-solid fa-chart-line" style="font-size: 50px; margin-bottom: 20px;"></i>
-                <h2>Welcome to GORUN Ecosystem</h2>
-                <p>Select an option from the sidebar to manage your business.</p>
+            <div style="background: white; padding: 60px; border-radius: 25px; text-align: center; color: #94a3b8; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                <i class="fa-solid fa-rocket" style="font-size: 60px; color: var(--gorun-green); margin-bottom: 25px; opacity: 0.8;"></i>
+                <h2 style="color: var(--dark-blue);">Your Hyper-Local Portal is Ready</h2>
+                <p>Manage your inventory, hire skilled staff, and track logistics from this unified hub.</p>
             </div>
         </div>
     </div>
 
     <script src="../config.js"></script>
     <script>
-        // ইউজার চেক করা
-        const userPhone = localStorage.getItem('gorun_user');
-        if(!userPhone) { window.location.href = "../index.html"; }
+        // ইউজার এবং সেশন চেক
+        const phone = localStorage.getItem('gorun_user');
+        if(!phone) window.location.href = "../index.html";
 
-        document.getElementById('merchantID').innerText = "ID: " + userPhone;
+        // তারিখ আপডেট
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
-        // ফায়ারবেস থেকে ক্যাটাগরি অনুযায়ী ইন্টারফেস চেঞ্জ করা
-        db.ref('gorun_merchants/' + userPhone).once('value').then(snap => {
-            if(snap.exists()){
-                const data = snap.val();
-                const cat = data.category;
-                
-                document.getElementById('welcomeMsg').innerText = "Welcome, " + data.shopName;
-                document.getElementById('categoryBadge').innerText = cat;
+        // ফায়ারবেস ডাটা লোড
+        db.ref('gorun_merchants/' + phone).once('value').then(snap => {
+            const user = snap.val();
+            if(!user) return;
+            
+            const cat = user.category;
 
-                // লজিক: ইনভেন্টরি কাদের থাকবে (Groceries, Food, Medicine, Fashion)
-                const hasInventory = ["Groceries", "Food", "Medicine", "Fashion"].includes(cat);
-                
-                if(hasInventory) {
-                    document.getElementById('menuInventory').classList.remove('hidden');
-                    document.getElementById('menuSourcing').classList.remove('hidden');
-                    document.getElementById('statStock').classList.remove('hidden');
+            document.getElementById('shopNameDisplay').innerText = user.shopName;
+            document.getElementById('shopCat').innerText = cat;
+            document.getElementById('idDisplay').innerText = phone;
+
+            setupLayout(cat);
+        });
+
+        function setupLayout(cat) {
+            const cards = document.getElementById('overviewCards');
+            let cardHTML = '';
+
+            // ১. সাইডবার লজিক (Category Mapping)
+            if(["Groceries", "Medicine", "Food", "Fashion"].includes(cat)) {
+                document.getElementById('grp-inventory').classList.remove('hidden');
+                if(["Groceries", "Medicine"].includes(cat)) {
+                    document.getElementById('itm-m2m').classList.remove('hidden');
                 }
             }
-        });
+            
+            if(cat === "Electronic") {
+                document.getElementById('grp-finance').classList.remove('hidden');
+            }
+            
+            if(cat === "Corporate") {
+                document.getElementById('grp-corporate').classList.remove('hidden');
+                document.getElementById('grp-logistics').classList.add('hidden'); // কর্পোরেটের জন্য সাধারণ ডেলিভারি নেই
+            }
+
+            // ২. ডাইনামিক স্ট্যাটাস কার্ড (Overview Cards)
+            if(cat === "Electronic") {
+                cardHTML = `
+                    <div class="card"><p>Total Sales</p><h3>৳ 0</h3></div>
+                    <div class="card"><p>Monthly Profit</p><h3>৳ 0</h3></div>
+                    <div class="card"><p>Wholesale Orders</p><h3>0</h3></div>
+                    <div class="card"><p>Margin Rate</p><h3>0%</h3></div>
+                `;
+            } else if(cat === "Corporate") {
+                cardHTML = `
+                    <div class="card"><p>Total Employees</p><h3>0</h3></div>
+                    <div class="card"><p>Pending Tasks</p><h3>0</h3></div>
+                    <div class="card"><p>Active Monitoring</p><h3>0</h3></div>
+                    <div class="card"><p>Open Positions</p><h3>0</h3></div>
+                `;
+            } else {
+                // Grocery, Food, Medicine, Fashion এর জন্য
+                cardHTML = `
+                    <div class="card"><p>Total Orders</p><h3>0</h3></div>
+                    <div class="card"><p>Inventory Status</p><h3>Good</h3></div>
+                    <div class="card"><p>Active Staff</p><h3>0</h3></div>
+                    <div class="card"><p>Daily Earning</p><h3>৳ 0</h3></div>
+                `;
+            }
+            cards.innerHTML = cardHTML;
+        }
 
         function logout() {
             localStorage.removeItem('gorun_user');

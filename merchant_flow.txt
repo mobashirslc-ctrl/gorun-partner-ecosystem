@@ -1,0 +1,26 @@
+GORUN MERCHANT ARCHITECTURE FLOW
+--------------------------------
+
+1. GROCERIES & MEDICINE:
+   - Features: Overview, Inventory (Expiry/Weight), M2M Sourcing, Staff Hiring, Delivery, Support.
+   - Purpose: Stock sharing and expert staff rental.
+
+2. FASHION:
+   - Features: Overview, Inventory (Size/Color), Staff Hiring, Delivery, Support.
+   - Purpose: Visual product management and styling staff.
+
+3. FOOD:
+   - Features: Overview, Fresh Inventory, Staff Hiring, Delivery, Support.
+   - Purpose: Quick turnaround items and delivery focused.
+
+4. ELECTRONIC:
+   - Features: Overview, Wholesale Purchase, Staff Hiring, Analytics (Profit/Loss/Margin).
+   - Purpose: B2B sourcing and financial growth tracking.
+
+5. CORPORATE:
+   - Features: Dept Management, Staff Monitoring, Task Tracking, Internal Support.
+   - Purpose: Organizational efficiency (No public sales).
+
+GLOBAL MODULES:
+- Complain Box: Reporting issues.
+- Customer Support: Admin ticket system.

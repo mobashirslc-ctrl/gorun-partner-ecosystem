@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Onboarding | GORUN</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --light-bg: #f8fafc; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { background: var(--light-bg); display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .reg-container { background: white; width: 100%; max-width: 750px; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h2 { color: var(--dark-blue); font-size: 28px; }
+        .header p { color: #64748b; margin-top: 5px; }
+
+        .form-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0; }
+        .section-title { font-size: 14px; color: var(--gorun-green); font-weight: 700; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+        input, select, textarea { 
+            width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; 
+            font-size: 14px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--gorun-green); box-shadow: 0 0 0 3px rgba(0,143,81,0.1); }
+
+        /* Checkbox Grid Styling */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            margin-top: 10px;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            transition: 0.3s;
+        }
+        .check-item:hover { border-color: var(--gorun-green); background: #f0fff4; }
+        .check-item input { width: auto; margin-right: 12px; accent-color: var(--gorun-green); }
+        .check-item span { font-size: 14px; color: var(--dark-blue); font-weight: 500; }
+        .check-item i { margin-right: 8px; color: var(--gorun-green); width: 20px; }
+
+        .btn-submit { 
+            width: 100%; background: var(--gorun-green); color: white; padding: 15px; 
+            border: none; border-radius: 10px; font-size: 16px; font-weight: 700; 
+            cursor: pointer; transition: 0.3s; margin-top: 20px;
+        }
+        .btn-submit:hover { background: #007a45; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="reg-container">
+    <div class="header">
+        <h2 style="color: var(--gorun-green);">GORUN Expert</h2>
+        <p>Universal Staff Registration Portal</p>
+    </div>
+
+    <form id="staffRegForm">
+        <div class="form-section">
+            <span class="section-title">Personal Information</span>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="staffName" placeholder="Enter your full name" required>
+                </div>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="staffPhone" placeholder="017XXXXXXXX" required>
+                </div>
+                <div class="input-group">
+                    <label>NID Number</label>
+                    <input type="number" id="staffNID" placeholder="National ID" required>
+                </div>
+                <div class="input-group">
+                    <label>Account Password</label>
+                    <input type="password" id="staffPass" placeholder="Create password" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Work Categories (Select All That Apply)</span>
+            <div class="category-grid">
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Corporate">
+                    <span><i class="fa-solid fa-building"></i> Corporate Admin</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Medicine">
+                    <span><i class="fa-solid fa-pills"></i> Medicine Expert</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Groceries">
+                    <span><i class="fa-solid fa-basket-shopping"></i> Groceries</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Food">
+                    <span><i class="fa-solid fa-utensils"></i> Food Service</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Fashion">
+                    <span><i class="fa-solid fa-shirt"></i> Fashion Retail</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" name="workCat" value="Electronic">
+                    <span><i class="fa-solid fa-microchip"></i> Electronics/IT</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Expertise & Rates</span>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Expected Hourly Rate (৳)</label>
+                    <input type="number" id="hourlyRate" placeholder="e.g. 350" required>
+                </div>
+                <div class="input-group">
+                    <label>Years of Experience</label>
+                    <select id="experience" required>
+                        <option value="0">Fresh / Newbie</option>
+                        <option value="1-2">1 - 2 Years</option>
+                        <option value="3-5">3 - 5 Years</option>
+                        <option value="5+">5+ Years (Expert)</option>
+                    </select>
+                </div>
+                <div class="input-group" style="grid-column: 1 / -1;">
+                    <label>Key Skills (Tags)</label>
+                    <input type="text" id="keySkills" placeholder="e.g. MS Excel, Accounting, Customer Handling, Hardware Repair">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Credentials</span>
+            <div class="input-group">
+                <label>CV / Portfolio Link (Google Drive)</label>
+                <input type="url" id="cvLink" placeholder="https://drive.google.com/your-file-link">
+            </div>
+            <div class="input-group">
+                <label>Educational Degree</label>
+                <input type="text" id="education" placeholder="e.g. BSc in Computer Science / HSC / MBA">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Register as GORUN Expert</button>
+    </form>
+</div>
+
+<script src="../config.js"></script>
+<script>
+    document.getElementById('staffRegForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // সব সিলেক্ট করা ক্যাটাগরিগুলো একটি লিস্টে নেওয়া
+        const selectedCategories = [];
+        document.querySelectorAll('input[name="workCat"]:checked').forEach((checkbox) => {
+            selectedCategories.push(checkbox.value);
+        });
+
+        if(selectedCategories.length === 0) {
+            alert("Please select at least one work category!");
+            return;
+        }
+
+        const phone = document.getElementById('staffPhone').value;
+
+        // আপনার staffData অবজেক্টে এটি আপডেট করা হয়েছে
+        const staffData = {
+            name: document.getElementById('staffName').value,
+            phone: phone,
+            nid: document.getElementById('staffNID').value,
+            password: document.getElementById('staffPass').value,
+            categories: selectedCategories, // এখন এটি একটি লিস্ট (Array)
+            hourlyRate: document.getElementById('hourlyRate').value,
+            experience: document.getElementById('experience').value,
+            skills: document.getElementById('keySkills').value,
+            cvLink: document.getElementById('cvLink').value,
+            education: document.getElementById('education').value,
+            status: "pending", 
+            isLive: false,
+            rating: 5.0,
+            joinedDate: new Date().toISOString()
+        };
+
+        // Firebase এ ডাটা পাঠানো
+        db.ref('gorun_staffs/' + phone).set(staffData).then(() => {
+            alert("Registration Successful! Please wait for Admin approval.");
+            window.location.href = "../index.html"; 
+        }).catch(err => {
+            alert("Error: " + err.message);
+        });
+    });
+</script>
+
+</body>
+</html>

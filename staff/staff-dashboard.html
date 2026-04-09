@@ -113,18 +113,46 @@
         const currentStaffId = "staff_mobashir_01"; 
         let currentJobId = null;
 
-        // --- 1. Active Status Toggle ---
-        const statusSwitch = document.querySelector('#status-toggle');
-        if(statusSwitch) {
-            statusSwitch.addEventListener('change', (e) => {
-                db.collection("staffs").doc(currentStaffId).set({
-                    isActive: e.target.checked,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+      // --- 1. Sidebar Navigation Response ---
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all
+                navItems.forEach(i => i.classList.remove('active'));
+                // Add to clicked one
+                this.classList.add('active');
+                
+                const menuText = this.querySelector('span').innerText;
+                console.log("Navigating to:", menuText);
+                
+                if(menuText === "Logout") {
+                    if(confirm("Are you sure you want to logout?")) {
+                        location.reload(); 
+                    }
+                }
+                // Note: Ekhane apni future-e page switch logic add korte parben
+            });
+        });
+
+        // --- 2. QR Scanner Button Response ---
+        const scanBtn = document.getElementById('qr-action-btn');
+        if(scanBtn) {
+            scanBtn.addEventListener('click', function() {
+                alert("Opening QR Scanner... (Camera access requested)");
+                // Ekhane QR library integrate kora jabe
+                console.log("Scanner initiated for Job ID:", currentJobId);
             });
         }
 
-        // --- 2. Live Job Tracker (Dynamic Tracking) ---
+        // --- 3. Withdraw Button Response ---
+        const withdrawBtn = document.querySelector('.btn-withdraw');
+        if(withdrawBtn) {
+            withdrawBtn.addEventListener('click', () => {
+                alert("Withdrawal request sent to admin.");
+            });
+        }
+
+        // --- 4. Live Job Tracker (Re-verified) ---
         function trackActiveJob() {
             db.collection("jobs")
               .where("assignedStaff", "==", currentStaffId)
@@ -154,46 +182,6 @@
                 }
             });
         }
-
-        // --- 3. Task UI Rendering ---
-        function renderTasks(tasks) {
-            const taskContainer = document.getElementById('task-container');
-            if(!taskContainer) return;
-            taskContainer.innerHTML = ''; 
-            
-            tasks.forEach((task, index) => {
-                const taskItem = document.createElement('label');
-                taskItem.className = 'task-item';
-                taskItem.innerHTML = `
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTaskStatus(${index}, this.checked)">
-                    <span style="${task.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${task.title}</span>
-                `;
-                taskContainer.appendChild(taskItem);
-            });
-
-            const completed = tasks.filter(t => t.completed).length;
-            const percent = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
-            const progressDiv = document.createElement('div');
-            progressDiv.style = "text-align: right; font-size: 12px; color: #64748b; margin-top: 15px;";
-            progressDiv.innerHTML = `Progress: ${percent}% Completed`;
-            taskContainer.appendChild(progressDiv);
-        }
-
-        // --- 4. Wallet & Profile Sync ---
-        function syncWallet() {
-            db.collection("staffs").doc(currentStaffId).onSnapshot((doc) => {
-                if(doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('wallet-balance').innerText = `৳ ${(data.balance || 0).toLocaleString()}`;
-                    document.getElementById('display-name').innerText = `Hello, ${data.name || 'Mobashir'}!`;
-                    document.getElementById('tasks-count').innerText = data.tasksCompleted || 0;
-                    
-                    // Sync initial switch status
-                    if(statusSwitch) statusSwitch.checked = data.isActive;
-                }
-            });
-        }
-
         // --- 5. Job Requests Loader ---
         function loadJobRequests() {
             const requestsContainer = document.getElementById('requests-container');

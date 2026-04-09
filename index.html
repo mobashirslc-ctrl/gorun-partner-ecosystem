@@ -163,7 +163,27 @@
             loginSec.classList.remove('active');
         }
     }
-
+function loginStaff(phone, pass) {
+    db.ref('gorun_staffs/' + phone).once('value').then(snap => {
+        if(snap.exists()) {
+            const user = snap.val();
+            if(user.password === pass) {
+                // চেক করছে অ্যাডমিন অ্যাপ্রুভ করেছে কি না
+                if(user.status === "approved") {
+                    localStorage.setItem('gorun_user', phone);
+                    localStorage.setItem('user_role', 'staff');
+                    window.location.href = "staff/dashboard.html";
+                } else {
+                    alert("Your account is still pending approval. Please wait for the admin to verify your profile.");
+                }
+            } else {
+                alert("Wrong Password!");
+            }
+        } else {
+            alert("No staff account found with this number.");
+        }
+    });
+}
     // Firebase Registration with Approval Logic
     document.getElementById('regForm').onsubmit = function(e) {
         e.preventDefault();

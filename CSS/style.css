@@ -90,3 +90,24 @@ body {
     height: 80px; /* এটি যোগ করুন */
     resize: none; 
 }
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+.check-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    transition: 0.2s;
+}
+.check-item:hover { border-color: #008f51; background: #f0fff4; }
+.check-item input { width: auto; margin-right: 10px; accent-color: #008f51; }

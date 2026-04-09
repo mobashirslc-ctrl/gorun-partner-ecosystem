@@ -3,106 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Registration | GORUN</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <title>Staff Dashboard | GORUN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --light-bg: #f8fafc; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        body { background: var(--light-bg); display: flex; justify-content: center; align-items: center; padding: 40px 20px; min-height: 100vh; }
-        .reg-container { background: white; width: 100%; max-width: 750px; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h2 { color: var(--dark-blue); font-size: 28px; }
-        .header p { color: #64748b; margin-top: 5px; }
-
-        .form-section { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0; }
-        .section-title { font-size: 14px; color: var(--gorun-green); font-weight: 700; text-transform: uppercase; margin-bottom: 15px; display: block; }
-
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; }
-        input, select, textarea {
-            width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px;
-            font-size: 14px; outline: none; transition: 0.3s;
+        :root { 
+            --gorun-green: #008f51; 
+            --dark-blue: #0f172a; 
+            --light-bg: #f1f5f9; 
+            --white: #ffffff;
         }
-        input:focus, select:focus { border-color: var(--gorun-green); box-shadow: 0 0 0 3px rgba(0,143,81,0.1); }
 
-        /* Category Grid CSS (এটি মিসিং ছিল) */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            background: #f1f5f9;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 15px;
-        }
-        .check-item {
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--light-bg); color: var(--dark-blue); }
+
+        /* Header Styles */
+        header {
+            background: var(--white);
+            padding: 15px 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-weight: 800; color: var(--gorun-green); font-size: 20px; }
+
+        /* Main Container */
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+        /* Status Card */
+        .status-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .timer-display {
+            font-size: 42px;
+            font-weight: 700;
+            margin: 15px 0;
+            color: var(--dark-blue);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #e2e8f0;
+            margin-bottom: 10px;
+        }
+
+        .status-active { background: #dcfce7; color: #15803d; }
+
+        /* QR Button */
+        .btn-qr {
+            width: 100%;
+            background: var(--gorun-green);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            border: 1px solid #cbd5e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
             transition: 0.3s;
         }
-        .check-item:hover { border-color: var(--gorun-green); background: #f0fff4; }
-        .check-item input { width: auto; margin-right: 12px; accent-color: var(--gorun-green); }
-        .check-item span { font-size: 14px; color: var(--dark-blue); font-weight: 500; }
 
-        .btn-submit {
-            width: 100%; background: var(--gorun-green); color: white; padding: 15px;
-            border: none; border-radius: 10px; font-size: 16px; font-weight: 700;
-            cursor: pointer; transition: 0.3s; margin-top: 20px;
+        .btn-qr:hover { background: #007a45; transform: translateY(-2px); }
+
+        /* Task Section */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .btn-submit:hover { background: #007a45; transform: translateY(-2px); }
+
+        .task-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .task-item {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+        }
+
+        .task-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--gorun-green);
+            cursor: pointer;
+        }
+
+        .task-item span { font-size: 15px; font-weight: 500; }
+
+        .task-done span { text-decoration: line-through; color: #94a3b8; }
+
+        /* Footer Navigation */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-item { text-align: center; color: #64748b; text-decoration: none; font-size: 12px; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item.active { color: var(--gorun-green); }
+
     </style>
 </head>
 <body>
 
-<div class="reg-container" id="regMain">
-    <div class="header">
-        <img src="../assets/img/logo.png" alt="GORUN" style="width: 60px; margin-bottom: 10px;">
-        <h2>Staff Onboarding</h2>
-        <p>Become a Qualified GORUN Expert</p>
-    </div>
+    <header>
+        <div class="logo">GORUN STAFF</div>
+        <div class="profile-icon"><i class="fas fa-user-circle fa-2x" style="color: #64748b;"></i></div>
+    </header>
 
-    <form id="staffRegForm">
-        <div class="form-section">
-            <span class="section-title">Personal Details</span>
-            <div class="input-grid">
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" id="staffName" placeholder="e.g. Mr. Mobashir" required>
-                </div>
-                <div class="input-group">
-                    <label>Phone Number</label>
-                    <input type="tel" id="staffPhone" placeholder="017XXXXXXXX" required>
-                </div>
-                <div class="input-group">
-                    <label>NID Number</label>
-                    <input type="number" id="staffNID" placeholder="National ID Number" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="staffPass" placeholder="Set a password" required>
-                </div>
-            </div>
+    <div class="container">
+        <div class="status-card">
+            <div class="status-badge status-active">On Duty: Corporate Office</div>
+            <div class="timer-display" id="clock">01:24:45</div>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Working since 02:00 PM</p>
+            
+            <button class="btn-qr">
+                <i class="fas fa-qrcode"></i> Scan to Check-out
+            </button>
         </div>
 
-        <div class="form-section">
-            <span class="section-title">Professional Expertise</span>
-            <div class="input-group" style="grid-column: 1 / -1;">
-                <label>Work Categories (Select all that apply)</label>
-                <div class="category-grid">
-                    <label class="check-item"><input type="checkbox" name="workCat" value="Corporate"> <span>Corporate</span></label>
-                    <label class="check-item"><input type="checkbox" name="workCat" value="Medicine"> <span>Medicine</span></label>
-                    <label class="check-item"><input type="checkbox" name="workCat" value="Groceries"> <span>Groceries</span></label>
-                    <label class="check-item"><input type="checkbox" name="workCat" value="Food"> <span>Food & Service</span></label>
-                    <label class="check-item"><input
+        <div class="section-title">
+            Today's Tasks
+            <span style="font-size: 12px; color: var(--gorun-green);">2/4 Completed</span>
+        </div>
+
+        <div class="task-list">
+            <div class="task-item task-done">
+                <input type="checkbox" checked disabled>
+                <span>Report to Reception</span>
+            </div>
+            <div class="task-item task-done">
+                <input type="checkbox" checked disabled>
+                <span>File Organization - Dept A</span>
+            </div>
+            <div class="task-item">
+                <input type="checkbox">
+                <span>Data Entry for New Leads</span>
+            </div>
+            <div class="task-item">
+                <input type="checkbox">
+                <span>Client Document Verification</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <a href="#" class="nav-item active"><i class="fas fa-home"></i>Dashboard</a>
+        <a href="#" class="nav-item"><i class="fas fa-tasks"></i>My Jobs</a>
+        <a href="#" class="nav-item"><i class="fas fa-wallet"></i>Earnings</a>
+        <a href="#" class="nav-item"><i class="fas fa-cog"></i>Settings</a>
+    </div>
+
+</body>
+</html>

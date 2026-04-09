@@ -193,7 +193,7 @@
                 if(user.pass === pass) {
                     if(user.status === "approved") {
                         localStorage.setItem('gorun_user', phone);
-                        window.location.href = "dashboard/index.html";
+                       window.location.href = "merchant/dashboard.html";
                     } else {
                         document.getElementById('loginWaiting').style.display = 'block';
                     }

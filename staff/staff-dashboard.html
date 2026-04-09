@@ -38,11 +38,11 @@
     <div class="sidebar">
         <div class="logo">GORUN</div>
         <ul class="nav-menu">
-            <li class="nav-item active"><i class="fas fa-th-large"></i> <span>Dashboard</span></li>
-            <li class="nav-item"><i class="fas fa-briefcase"></i> <span>Job Requests</span></li>
-            <li class="nav-item"><i class="fas fa-history"></i> <span>Job History</span></li>
-            <li class="nav-item"><i class="fas fa-wallet"></i> <span>Earnings</span></li>
-            <li class="nav-item" style="margin-top: 50px;"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></li>
+            <li class="nav-item active" onclick="showSection('dashboard')"><i class="fas fa-th-large"></i> <span>Dashboard</span></li>
+            <li class="nav-item" onclick="showSection('jobs')"><i class="fas fa-briefcase"></i> <span>Job Requests</span></li>
+            <li class="nav-item" onclick="showSection('history')"><i class="fas fa-history"></i> <span>Job History</span></li>
+            <li class="nav-item" onclick="showSection('earnings')"><i class="fas fa-wallet"></i> <span>Earnings</span></li>
+            <li class="nav-item" style="margin-top: 50px;" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></li>
         </ul>
     </div>
 
@@ -58,39 +58,46 @@
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="wallet-card">
-                <h4>Total Balance</h4>
-                <div class="balance" id="wallet-balance">৳ 0.00</div>
-                <button class="btn-withdraw"><i class="fas fa-money-bill-transfer"></i> Withdraw</button>
-            </div>
-            <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                <p style="color: #64748b; font-size: 14px;">Tasks Completed</p>
-                <h3 id="tasks-count" style="font-size: 28px;">0</h3>
-                <hr style="margin: 10px 0; opacity: 0.1;">
-                <p style="color: #64748b; font-size: 14px;">Rating</p>
-                <h3 style="color: #f59e0b;"><i class="fas fa-star"></i> 4.9</h3>
-            </div>
-        </div>
-
-        <div id="active-job-card-container"> <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
-            <div id="active-job-card" style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
-                <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
-                    <i class="fas fa-map-marker-alt"></i> At: <span id="job-location">Searching...</span>
+        <div id="dashboard-view">
+            <div class="stats-grid">
+                <div class="wallet-card">
+                    <h4>Total Balance</h4>
+                    <div class="balance" id="wallet-balance">৳ 0.00</div>
+                    <button class="btn-withdraw"><i class="fas fa-money-bill-transfer"></i> Withdraw</button>
                 </div>
-                <h1 id="timer-display" style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">00:00:00</h1>
-                <p id="shift-start-time" style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Shift Started: --:--</p>
-                <button id="qr-action-btn" style="width: 100%; max-width: 300px; background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 10px;">
-                    <i class="fas fa-qrcode"></i> Scan QR to Check-out
-                </button>
+                <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+                    <p style="color: #64748b; font-size: 14px;">Tasks Completed</p>
+                    <h3 id="tasks-count" style="font-size: 28px;">0</h3>
+                    <hr style="margin: 10px 0; opacity: 0.1;">
+                    <p style="color: #64748b; font-size: 14px;">Rating</p>
+                    <h3 style="color: #f59e0b;"><i class="fas fa-star"></i> 4.9</h3>
+                </div>
             </div>
+
+            <div id="active-job-card-container" style="display: none;"> 
+                <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
+                <div id="active-job-card" style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
+                    <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
+                        <i class="fas fa-map-marker-alt"></i> At: <span id="job-location">Searching...</span>
+                    </div>
+                    <h1 id="timer-display" style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">00:00:00</h1>
+                    <p id="shift-start-time" style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Shift Started: --:--</p>
+                    <button id="qr-action-btn" style="width: 100%; max-width: 300px; background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 10px;">
+                        <i class="fas fa-qrcode"></i> Scan QR to Check-out
+                    </button>
+                </div>
+                <div class="card-title"><i class="fas fa-tasks" style="color: #3b82f6;"></i> Assigned Tasks</div>
+                <div class="task-list" id="task-container"></div>
+            </div>
+
+            <div class="card-title"><i class="fas fa-bell" style="color: #f59e0b;"></i> New Job Requests</div>
+            <div id="requests-container"></div>
         </div>
 
-        <div class="card-title"><i class="fas fa-tasks" style="color: #3b82f6;"></i> Assigned Tasks</div>
-        <div class="task-list" id="task-container"></div>
-
-        <div class="card-title"><i class="fas fa-bell" style="color: #f59e0b;"></i> New Job Requests</div>
-        <div id="requests-container"></div>
+        <div id="table-display-container" style="margin-top: 30px; display: none;">
+            <h3 id="table-title" style="margin-bottom: 15px;">Data Table</h3>
+            <div id="data-table" style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow-x: auto;"></div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -107,19 +114,52 @@
             measurementId: "G-TNBL8B9TFR"
         };
 
-     // --- Initialization Fix ---
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         const currentStaffId = "staff_mobashir_01"; 
         let currentJobId = null;
 
-        // 1. Sidebar Fix
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
+        // --- 1. Sidebar Logic ---
+        function showSection(section) {
+            const dashboard = document.getElementById('dashboard-view');
+            const tableContainer = document.getElementById('table-display-container');
+            const tableDiv = document.getElementById('data-table');
+            const tableTitle = document.getElementById('table-title');
 
-        // 2. Wallet Sync Function (MUST BE DEFINED)
+            // Reset Active Class
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            if (section === 'dashboard') {
+                dashboard.style.display = 'block';
+                tableContainer.style.display = 'none';
+            } else {
+                dashboard.style.display = 'none';
+                tableContainer.style.display = 'block';
+                
+                if (section === 'jobs') {
+                    tableTitle.innerText = "Available Job Requests";
+                    tableDiv.innerHTML = `<table style="width: 100%; border-collapse: collapse;"><thead><tr style="text-align: left; border-bottom: 2px solid #f1f5f9;"><th style="padding: 10px;">Location</th><th style="padding: 10px;">Rate</th><th style="padding: 10px;">Action</th></tr></thead><tbody id="jobs-table-body"><tr><td colspan="3" style="padding:10px;">Loading...</td></tr></tbody></table>`;
+                    loadJobsTable();
+                } else {
+                    tableTitle.innerText = section.charAt(0).toUpperCase() + section.slice(1);
+                    tableDiv.innerHTML = `<p style="padding:20px; color:#64748b;">No ${section} records found.</p>`;
+                }
+            }
+        }
+
+        function loadJobsTable() {
+            db.collection("jobs").where("status", "==", "open").get().then((querySnapshot) => {
+                const tbody = document.getElementById('jobs-table-body');
+                tbody.innerHTML = querySnapshot.empty ? '<tr><td colspan="3" style="padding:10px;">No open jobs.</td></tr>' : '';
+                querySnapshot.forEach((doc) => {
+                    const job = doc.data();
+                    tbody.innerHTML += `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 10px;">${job.location}</td><td style="padding: 10px;">৳${job.rate}/hr</td><td style="padding: 10px;"><button onclick="acceptJob('${doc.id}')" style="background:var(--gorun-green); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Accept</button></td></tr>`;
+                });
+            });
+        }
+
+        // --- 2. Real-time Listeners ---
         function syncWallet() {
             db.collection("staffs").doc(currentStaffId).onSnapshot((doc) => {
                 if(doc.exists) {
@@ -128,113 +168,91 @@
                     document.getElementById('display-name').innerText = `Hello, ${data.name || 'Mobashir'}!`;
                     document.getElementById('tasks-count').innerText = data.tasksCompleted || 0;
                 }
-            }, (error) => {
-                console.error("Firestore Error:", error);
             });
         }
 
-        // 3. Job Tracker (QR Scan logic ekhanei)
         function trackActiveJob() {
-            db.collection("jobs")
-              .where("assignedStaff", "==", currentStaffId)
-              .where("status", "==", "ongoing")
-              .onSnapshot((querySnapshot) => {
+            db.collection("jobs").where("assignedStaff", "==", currentStaffId).where("status", "==", "ongoing").onSnapshot((querySnapshot) => {
                 const container = document.getElementById('active-job-card-container');
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
                     currentJobId = doc.id;
                     const data = doc.data();
-                    container.style.display = 'block'; // Ongoing thaklei QR card ashbe
+                    container.style.display = 'block';
                     document.getElementById('job-location').innerText = data.location || "N/A";
-                    if(data.startTime) {
-                        const startTime = data.startTime.toDate();
-                        document.getElementById('shift-start-time').innerText = `Shift Started: ${startTime.toLocaleTimeString()}`;
-                        startLiveTimer(startTime);
-                    }
+                    if(data.startTime) startLiveTimer(data.startTime.toDate());
                     renderTasks(data.tasks || []);
                 } else {
-                    container.style.display = 'none'; // Ongoing na thakle QR card hide thakbe
+                    container.style.display = 'none';
                 }
             });
         }
 
-        // 4. Render Tasks
+        function loadJobRequests() {
+            const requestsContainer = document.getElementById('requests-container');
+            db.collection("jobs").where("status", "==", "open").onSnapshot((querySnapshot) => {
+                requestsContainer.innerHTML = querySnapshot.empty ? '<p style="color: #94a3b8; padding: 20px;">No new requests found.</p>' : '';
+                querySnapshot.forEach((doc) => {
+                    const job = doc.data();
+                    const jobDiv = document.createElement('div');
+                    jobDiv.style = "background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--gorun-green); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);";
+                    jobDiv.innerHTML = `<div><h5 style="font-weight:700;">${job.location}</h5><p style="font-size:12px; color:#64748b;">Rate: ৳${job.rate || '200'}/hr</p></div><button style="background: var(--gorun-green); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="acceptJob('${doc.id}')">Accept</button>`;
+                    requestsContainer.appendChild(jobDiv);
+                });
+            });
+        }
+
+        // --- 3. Actions ---
+        window.acceptJob = function(jobId) {
+            db.collection("jobs").doc(jobId).update({
+                assignedStaff: currentStaffId,
+                status: "ongoing",
+                startTime: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("Job Accepted!")).catch(err => alert("Error: " + err.message));
+        };
+
+        document.getElementById('qr-action-btn').addEventListener('click', () => alert("Opening Camera Scanner..."));
+        
+        document.querySelector('.btn-withdraw').addEventListener('click', () => {
+            const balance = document.getElementById('wallet-balance').innerText;
+            alert("Requesting withdrawal for: " + balance);
+        });
+
         function renderTasks(tasks) {
             const taskContainer = document.getElementById('task-container');
             taskContainer.innerHTML = '';
             tasks.forEach((task, index) => {
                 const taskItem = document.createElement('label');
                 taskItem.className = 'task-item';
-                taskItem.innerHTML = `
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTaskStatus(${index}, this.checked)">
-                    <span style="${task.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${task.title}</span>
-                `;
+                taskItem.innerHTML = `<input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTaskStatus(${index}, this.checked)"><span style="${task.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${task.title}</span>`;
                 taskContainer.appendChild(taskItem);
             });
         }
-        // --- 5. Job Requests Loader ---
-        function loadJobRequests() {
-            const requestsContainer = document.getElementById('requests-container');
-            db.collection("jobs").where("status", "==", "open").onSnapshot((querySnapshot) => {
-                requestsContainer.innerHTML = ''; 
-                if(querySnapshot.empty) {
-                    requestsContainer.innerHTML = '<p style="color: #94a3b8; padding: 20px;">No new requests found.</p>';
-                    return;
-                }
-                querySnapshot.forEach((doc) => {
-                    const job = doc.data();
-                    const jobDiv = document.createElement('div');
-                    jobDiv.className = 'job-request';
-                    // Inline style to match your UI image
-                    jobDiv.style = "background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--gorun-green); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);";
-                    jobDiv.innerHTML = `
-                        <div>
-                            <h5 style="font-weight:700;">${job.location}</h5>
-                            <p style="font-size:12px; color:#64748b;">Rate: ৳${job.rate || '200'}/hr</p>
-                        </div>
-                        <button class="btn-accept" style="background: var(--gorun-green); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="acceptJob('${doc.id}')">Accept</button>
-                    `;
-                    requestsContainer.appendChild(jobDiv);
-                });
-            });
-        }
 
-        window.acceptJob = function(jobId) {
-            db.collection("jobs").doc(jobId).update({
-                assignedStaff: currentStaffId,
-                status: "ongoing",
-                startTime: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { 
-                console.log("Job Accepted!"); 
-            }).catch(err => alert("Error: " + err.message));
-        };
-
-        // --- 6. Live Timer & Task Updates ---
-        let timerInterval;
-        function startLiveTimer(startTime) {
-            if(timerInterval) clearInterval(timerInterval);
-            const timerEl = document.getElementById('timer-display');
-            timerInterval = setInterval(() => {
-                const diff = new Date() - startTime;
-                const hours = Math.floor(diff / 3600000);
-                const minutes = Math.floor((diff % 3600000) / 60000);
-                const seconds = Math.floor((diff % 60000) / 1000);
-                timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }, 1000);
-        }
-
-        window.updateTaskStatus = function(index, isCompleted) {
+        function updateTaskStatus(index, isCompleted) {
             if(!currentJobId) return;
             db.collection("jobs").doc(currentJobId).get().then(doc => {
                 let tasks = doc.data().tasks;
                 tasks[index].completed = isCompleted;
                 db.collection("jobs").doc(currentJobId).update({ tasks: tasks });
             });
-        };
+        }
 
-        // Initialize Everything
-        trackActiveJob();
+        let timerInterval;
+        function startLiveTimer(startTime) {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const diff = new Date() - startTime;
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('timer-display').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        // Init
         syncWallet();
+        trackActiveJob();
         loadJobRequests();
     </script>
 </body>

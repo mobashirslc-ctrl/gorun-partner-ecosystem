@@ -107,79 +107,69 @@
             measurementId: "G-TNBL8B9TFR"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+     // --- Initialization Fix ---
         const currentStaffId = "staff_mobashir_01"; 
         let currentJobId = null;
 
-      // --- 1. Sidebar Navigation Response ---
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
+        // 1. Sidebar Fix
+        document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
-                // Remove active class from all
-                navItems.forEach(i => i.classList.remove('active'));
-                // Add to clicked one
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
-                
-                const menuText = this.querySelector('span').innerText;
-                console.log("Navigating to:", menuText);
-                
-                if(menuText === "Logout") {
-                    if(confirm("Are you sure you want to logout?")) {
-                        location.reload(); 
-                    }
-                }
-                // Note: Ekhane apni future-e page switch logic add korte parben
             });
         });
 
-        // --- 2. QR Scanner Button Response ---
-        const scanBtn = document.getElementById('qr-action-btn');
-        if(scanBtn) {
-            scanBtn.addEventListener('click', function() {
-                alert("Opening QR Scanner... (Camera access requested)");
-                // Ekhane QR library integrate kora jabe
-                console.log("Scanner initiated for Job ID:", currentJobId);
+        // 2. Wallet Sync Function (MUST BE DEFINED)
+        function syncWallet() {
+            db.collection("staffs").doc(currentStaffId).onSnapshot((doc) => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('wallet-balance').innerText = `৳ ${(data.balance || 0).toLocaleString()}`;
+                    document.getElementById('display-name').innerText = `Hello, ${data.name || 'Mobashir'}!`;
+                    document.getElementById('tasks-count').innerText = data.tasksCompleted || 0;
+                }
+            }, (error) => {
+                console.error("Firestore Error:", error);
             });
         }
 
-        // --- 3. Withdraw Button Response ---
-        const withdrawBtn = document.querySelector('.btn-withdraw');
-        if(withdrawBtn) {
-            withdrawBtn.addEventListener('click', () => {
-                alert("Withdrawal request sent to admin.");
-            });
-        }
-
-        // --- 4. Live Job Tracker (Re-verified) ---
+        // 3. Job Tracker (QR Scan logic ekhanei)
         function trackActiveJob() {
             db.collection("jobs")
               .where("assignedStaff", "==", currentStaffId)
               .where("status", "==", "ongoing")
               .onSnapshot((querySnapshot) => {
                 const container = document.getElementById('active-job-card-container');
-                const taskContainer = document.getElementById('task-container');
-                
                 if (!querySnapshot.empty) {
                     const doc = querySnapshot.docs[0];
-                    currentJobId = doc.id; 
+                    currentJobId = doc.id;
                     const data = doc.data();
-                    
-                    container.style.display = 'block';
+                    container.style.display = 'block'; // Ongoing thaklei QR card ashbe
                     document.getElementById('job-location').innerText = data.location || "N/A";
-                    
                     if(data.startTime) {
                         const startTime = data.startTime.toDate();
-                        document.getElementById('shift-start-time').innerText = `Shift Started: ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        document.getElementById('shift-start-time').innerText = `Shift Started: ${startTime.toLocaleTimeString()}`;
                         startLiveTimer(startTime);
                     }
                     renderTasks(data.tasks || []);
                 } else {
-                    container.style.display = 'none';
-                    currentJobId = null;
-                    taskContainer.innerHTML = '<p style="color: #94a3b8; padding: 20px; text-align: center;">No tasks assigned.</p>';
+                    container.style.display = 'none'; // Ongoing na thakle QR card hide thakbe
                 }
+            });
+        }
+
+        // 4. Render Tasks
+        function renderTasks(tasks) {
+            const taskContainer = document.getElementById('task-container');
+            taskContainer.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('label');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTaskStatus(${index}, this.checked)">
+                    <span style="${task.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${task.title}</span>
+                `;
+                taskContainer.appendChild(taskItem);
             });
         }
         // --- 5. Job Requests Loader ---

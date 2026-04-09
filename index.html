@@ -26,7 +26,6 @@
 
         .right-side { flex: 0.8; background: #ffffff; padding: 30px; display: flex; flex-direction: column; height: 650px; overflow-y: auto; }
         
-        /* স্লাইডিং বাটন ডিজাইন */
         .form-toggle {
             display: flex; background: #f1f5f9; border-radius: 12px; padding: 5px; margin-bottom: 25px; position: relative;
         }
@@ -36,7 +35,7 @@
         }
         .form-toggle button.active { color: white; }
         .toggle-bg {
-            position: absolute; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 100px); /* JS will handle this */
+            position: absolute; top: 5px; left: 5px; width: calc(50% - 5px);
             height: 40px; background: var(--gorun-green); border-radius: 10px; transition: 0.3s; z-index: 0;
         }
 
@@ -60,6 +59,9 @@
 
         .form-check { display: flex; gap: 8px; font-size: 12px; color: #64748b; margin-bottom: 15px; }
 
+        /* ওয়েটিং ও এরর মেসেজ স্টাইল */
+        .waiting-msg { color: #664d03; background-color: #fff3cd; border: 1px solid #ffecb5; padding: 10px; border-radius: 8px; font-size: 13px; display: none; margin-top: 10px; text-align: center; }
+
         @media (max-width: 950px) { .left-side { display: none; } .main-wrapper { max-width: 450px; } }
     </style>
 </head>
@@ -67,7 +69,7 @@
 
 <div class="main-wrapper">
     <div class="left-side">
-        <img src="assets/img/gorun thambile 345-01.jpg" alt="GORUN Banner">
+        <img src="assets/img/banner02.jpg" alt="GORUN Banner">
     </div>
 
     <div class="right-side">
@@ -93,6 +95,7 @@
                     <input type="password" id="loginPass" placeholder="••••••••" required>
                 </div>
                 <button type="submit" class="btn-action">Log In</button>
+                <div id="loginWaiting" class="waiting-msg">Account pending approval. Please wait for admin confirmation.</div>
             </form>
         </div>
 
@@ -131,6 +134,7 @@
                     <label>I agree to GORUN's <a href="#">Terms & Privacy</a></label>
                 </div>
                 <button type="submit" class="btn-action">Create Account</button>
+                <div id="regSuccess" class="waiting-msg" style="display:none; background-color: #d1e7dd; color: #0f5132;">Registration successful! Waiting for Admin Approval.</div>
             </form>
         </div>
     </div>
@@ -138,7 +142,6 @@
 
 <script src="config.js"></script>
 <script>
-    // স্লাইডিং লজিক
     function switchForm(type) {
         const bg = document.getElementById('toggleBg');
         const loginBtn = document.getElementById('loginTab');
@@ -161,7 +164,7 @@
         }
     }
 
-    // Firebase Registration
+    // Firebase Registration with Approval Logic
     document.getElementById('regForm').onsubmit = function(e) {
         e.preventDefault();
         const phone = document.getElementById('phone').value;
@@ -169,26 +172,36 @@
             shopName: document.getElementById('shopName').value,
             category: document.getElementById('category').value,
             address: document.getElementById('address').value,
-            pass: document.getElementById('pass').value
+            pass: document.getElementById('pass').value,
+            status: "pending" // Admin approve korle approved hobe
         };
         db.ref('gorun_merchants/' + phone).set(data).then(() => {
-            localStorage.setItem('gorun_user', phone);
-            window.location.href = "dashboard/index.html";
+            document.getElementById('regSuccess').style.display = 'block';
+            document.getElementById('regForm').reset();
         });
     };
 
-    // Firebase Login
+    // Firebase Login with Approval Check
     document.getElementById('loginForm').onsubmit = function(e) {
         e.preventDefault();
         const phone = document.getElementById('loginPhone').value;
         const pass = document.getElementById('loginPass').value;
 
         db.ref('gorun_merchants/' + phone).once('value').then(snap => {
-            if(snap.exists() && snap.val().pass === pass) {
-                localStorage.setItem('gorun_user', phone);
-                window.location.href = "dashboard/index.html";
+            if(snap.exists()) {
+                const user = snap.val();
+                if(user.pass === pass) {
+                    if(user.status === "approved") {
+                        localStorage.setItem('gorun_user', phone);
+                        window.location.href = "dashboard/index.html";
+                    } else {
+                        document.getElementById('loginWaiting').style.display = 'block';
+                    }
+                } else {
+                    alert("Wrong Password!");
+                }
             } else {
-                alert("Invalid Credentials!");
+                alert("User not found!");
             }
         });
     };

@@ -3,84 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merchant Dashboard - GORUN</title>
+    <title>Merchant Dashboard | GORUN</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f8fafc; display: flex; }
-        .sidebar { width: 280px; height: 100vh; background: white; border-right: 1px solid #e2e8f0; padding: 30px; position: fixed; }
-        .main { margin-left: 280px; padding: 40px; width: 100%; }
-        .logo-s { width: 100px; margin-bottom: 20px; }
-        .badge { background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
-        .box { background: white; padding: 30px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .menu-item { padding: 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; color: #475569; }
-        .menu-item:hover { background: #f1f5f9; color: #008f51; }
-        .active { background: #f0fdf4; color: #008f51; font-weight: bold; }
+        :root { --gorun-green: #008f51; --dark-blue: #1e293b; --light-bg: #f4f7f6; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body { display: flex; background: var(--light-bg); min-height: 100vh; }
+
+        /* Sidebar Design */
+        .sidebar { width: 260px; background: var(--dark-blue); color: white; display: flex; flex-direction: column; transition: 0.3s; }
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header img { width: 50px; }
+        
+        .nav-links { flex: 1; padding: 20px 10px; }
+        .nav-item { 
+            display: flex; align-items: center; padding: 12px 15px; color: #cbd5e1; 
+            text-decoration: none; border-radius: 8px; margin-bottom: 8px; transition: 0.3s; cursor: pointer;
+        }
+        .nav-item i { margin-right: 12px; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: var(--gorun-green); color: white; }
+
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .top-bar { 
+            background: white; padding: 15px 30px; display: flex; 
+            justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .content-body { padding: 30px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border-left: 5px solid var(--gorun-green); }
+        .stat-card p { color: #64748b; font-size: 13px; font-weight: 600; }
+        .stat-card h3 { font-size: 24px; margin-top: 5px; color: var(--dark-blue); }
+
+        .hidden { display: none !important; }
+        
+        .badge { background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <img src="../assets/img/logo.png" class="logo-s" alt="GORUN Logo">
-    <h3 id="shopName">Loading...</h3>
-    <p id="catText" style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;"></p>
-    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin-bottom: 20px;">
-    
-    <div class="menu-item active">Dashboard</div>
-    <div class="menu-item" id="invMenu">Inventory Management</div>
-    <div class="menu-item">Staff Hiring</div>
-    <div class="menu-item">Settings</div>
-    <div class="menu-item" style="color:red; margin-top:50px;" onclick="logout()">Logout</div>
-</div>
-
-<div class="main">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Welcome, <span id="welcomeName">---</span></h1>
-        <span id="badge" class="badge">---</span>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="../assets/img/logo.png" alt="GORUN">
+            <h3 style="margin-top:10px;">GORUN Merchant</h3>
+        </div>
+        <div class="nav-links">
+            <div class="nav-item active"><i class="fa-solid fa-gauge"></i> Overview</div>
+            
+            <div id="menuInventory" class="nav-item hidden"><i class="fa-solid fa-boxes-stacked"></i> My Inventory</div>
+            <div id="menuSourcing" class="nav-item hidden"><i class="fa-solid fa-handshake"></i> M2M Sourcing</div>
+            
+            <div class="nav-item"><i class="fa-solid fa-user-tie"></i> Staff Hiring</div>
+            <div class="nav-item"><i class="fa-solid fa-truck-fast"></i> Delivery Tasks</div>
+            <div class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Payments</div>
+            
+            <div class="nav-item" onclick="logout()" style="margin-top: 50px; color: #fb7185;"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+        </div>
     </div>
 
-    <div id="contentBox" class="box">
+    <div class="main-content">
+        <div class="top-bar">
+            <div>
+                <h4 id="welcomeMsg">Loading...</h4>
+                <span class="badge" id="categoryBadge">Category</span>
+            </div>
+            <div id="merchantID" style="font-weight: 700; color: var(--gorun-green);"></div>
         </div>
-</div>
 
-<script src="../config.js"></script>
-<script>
-    const user = localStorage.getItem('gorun_user');
-    if(!user) window.location.href = "../index.html";
+        <div class="content-body">
+            <div class="stats-grid">
+                <div class="stat-card"><p>Total Sales</p><h3>৳ 0.00</h3></div>
+                <div id="statStock" class="stat-card hidden"><p>Low Stock Items</p><h3>0</h3></div>
+                <div class="stat-card"><p>Active Staff</p><h3>0</h3></div>
+                <div class="stat-card"><p>Ongoing Delivery</p><h3>0</h3></div>
+            </div>
 
-    db.ref('gorun_merchants/' + user).once('value').then(snap => {
-        const d = snap.val();
-        if(!d) logout();
+            <div style="background: white; padding: 40px; border-radius: 15px; text-align: center; color: #94a3b8;">
+                <i class="fa-solid fa-chart-line" style="font-size: 50px; margin-bottom: 20px;"></i>
+                <h2>Welcome to GORUN Ecosystem</h2>
+                <p>Select an option from the sidebar to manage your business.</p>
+            </div>
+        </div>
+    </div>
 
-        document.getElementById('shopName').innerText = d.shopName;
-        document.getElementById('welcomeName').innerText = d.shopName;
-        document.getElementById('badge').innerText = d.category;
-        document.getElementById('catText').innerText = d.category + " Merchant";
+    <script src="../config.js"></script>
+    <script>
+        // ইউজার চেক করা
+        const userPhone = localStorage.getItem('gorun_user');
+        if(!userPhone) { window.location.href = "../index.html"; }
 
-        const box = document.getElementById('contentBox');
-        if(d.category === "Corporate") {
-            box.innerHTML = `
-                <h2 style="color:#008f51">Corporate Services</h2>
-                <p>Hire skilled staff and manage office logistics on a per-hour basis.</p>
-                <button style="margin-top:20px; padding:10px 20px; background:#008f51; color:white; border:none; border-radius:8px;">Find Staff</button>
-            `;
-            document.getElementById('invMenu').style.display = 'none';
-        } else {
-            box.innerHTML = `
-                <h2 style="color:#008f51">${d.category} Inventory</h2>
-                <p>Track your stock, manage orders, and local deliveries.</p>
-                <div style="display:flex; gap:20px; margin-top:20px;">
-                    <div style="flex:1; background:#f8fafc; padding:20px; border-radius:12px;"><h3>0</h3><p>Active Orders</p></div>
-                    <div style="flex:1; background:#f8fafc; padding:20px; border-radius:12px;"><h3>0</h3><p>Out of Stock</p></div>
-                </div>
-            `;
+        document.getElementById('merchantID').innerText = "ID: " + userPhone;
+
+        // ফায়ারবেস থেকে ক্যাটাগরি অনুযায়ী ইন্টারফেস চেঞ্জ করা
+        db.ref('gorun_merchants/' + userPhone).once('value').then(snap => {
+            if(snap.exists()){
+                const data = snap.val();
+                const cat = data.category;
+                
+                document.getElementById('welcomeMsg').innerText = "Welcome, " + data.shopName;
+                document.getElementById('categoryBadge').innerText = cat;
+
+                // লজিক: ইনভেন্টরি কাদের থাকবে (Groceries, Food, Medicine, Fashion)
+                const hasInventory = ["Groceries", "Food", "Medicine", "Fashion"].includes(cat);
+                
+                if(hasInventory) {
+                    document.getElementById('menuInventory').classList.remove('hidden');
+                    document.getElementById('menuSourcing').classList.remove('hidden');
+                    document.getElementById('statStock').classList.remove('hidden');
+                }
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('gorun_user');
+            window.location.href = "../index.html";
         }
-    });
-
-    function logout() {
-        localStorage.clear();
-        window.location.href = "../index.html";
-    }
-</script>
+    </script>
 </body>
 </html>

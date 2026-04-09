@@ -143,7 +143,7 @@
 
 <script src="config.js"></script>
 <script>
-   // ১. ট্যাব সুইচ করার ফাংশন
+  // ১. ট্যাব সুইচ করার ফাংশন
 function switchForm(type) {
     const bg = document.getElementById('toggleBg');
     const loginBtn = document.getElementById('loginTab');
@@ -177,57 +177,57 @@ document.getElementById('regForm').onsubmit = function(e) {
         pass: document.getElementById('pass').value,
         status: "pending" 
     };
-    // ডাটাবেজ পাথ সবসময় gorun_merchants হবে
     db.ref('gorun_merchants/' + phone).set(data).then(() => {
         document.getElementById('regSuccess').style.display = 'block';
         document.getElementById('regForm').reset();
     });
 };
 
-// ৩. মাস্টার লগইন ফাংশন (মার্চেন্ট এবং স্টাফ উভয়ের জন্য)
+// ৩. মাস্টার লগইন ফাংশন (মার্চেন্ট এবং স্টাফ উভয়ের জন্য)
 document.getElementById('loginForm').onsubmit = function(e) {
     e.preventDefault();
     
-    // নম্বর থেকে সব ধরণের স্পেস বা এক্সট্রা ক্যারেক্টার বাদ দেওয়া হচ্ছে
     let phone = document.getElementById('loginPhone').value.trim();
     const pass = document.getElementById('loginPass').value.trim();
     const waitingMsg = document.getElementById('loginWaiting');
 
     waitingMsg.style.display = 'none';
 
-    // ১. প্রথমে মার্চেন্ট হিসেবে চেক (gorun_merchants)
+    // ১. প্রথমে মার্চেন্ট হিসেবে চেক
     db.ref('gorun_merchants/' + phone).once('value').then(mSnap => {
         if(mSnap.exists() && mSnap.val().pass === pass) {
             if(mSnap.val().status === "approved") {
                 localStorage.setItem('gorun_user', phone);
-                window.location.href = "merchant/dashboard.html";
+                // মার্চেন্ট ড্যাশবোর্ডে পাঠাবে
+                window.location.href = "merchant/dashboard.html"; 
             } else {
                 waitingMsg.innerText = "Merchant account pending approval.";
                 waitingMsg.style.display = 'block';
             }
         } else {
-            // ২. মার্চেন্ট না পাওয়া গেলে স্টাফ হিসেবে চেক (gorun_staffs)
+            // ২. মার্চেন্ট না পাওয়া গেলে স্টাফ হিসেবে চেক
             db.ref('gorun_staffs/' + phone).once('value').then(sSnap => {
                 if(sSnap.exists()) {
                     const sData = sSnap.val();
-                    // আপনার ডাটাবেজ স্ক্রিনশট অনুযায়ী এখানে 'password' ব্যবহার করা হয়েছে
-                    if(sData.password === pass) {
-                        if(sData.status === "approved") {
+                    if (sData.password === pass) {
+                        if (sData.status === "approved") {
                             localStorage.setItem('gorun_user', phone);
-                            // স্টাফ ড্যাশবোর্ডে রিডাইরেক্ট
-                            window.location.href = "staff/staff-dashboard.html";
+                            // স্টাফ ড্যাশবোর্ডে পাঠাবে
+                            window.location.href = "staff/staff-dashboard.html"; 
                         } else {
-                            waitingMsg.innerText = "Staff account pending approval.";
-                            waitingMsg.style.display = 'block';
+                            alert("আপনার স্টাফ একাউন্টটি এখনো এপ্রুভ করা হয়নি।");
                         }
                     } else {
-                        alert("ভুল পাসওয়ার্ড (Staff)!");
+                        alert("ভুল পাসওয়ার্ড (Staff)!");
                     }
                 } else {
-                    alert("ইউজার পাওয়া যায়নি! সঠিক নম্বর দিয়ে চেষ্টা করুন।");
+                    alert("ইউজার পাওয়া যায়নি! সঠিক নম্বর দিয়ে চেষ্টা করুন।");
                 }
             });
         }
+    }).catch(err => {
+        console.error(err);
+        alert("সার্ভার এরর!");
     });
 };
 </script>

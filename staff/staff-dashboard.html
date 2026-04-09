@@ -56,14 +56,18 @@
         .btn-withdraw { background: white; color: var(--gorun-green); border: none; padding: 8px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
         .btn-withdraw:hover { transform: scale(1.05); }
 
-        /* New Job Requests */
-        .card-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        /* Cards and Titles */
+        .card-title { font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
         .job-request { background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--gorun-green); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .job-info h5 { font-size: 16px; margin-bottom: 5px; }
         .job-info p { font-size: 13px; color: #64748b; }
         .btn-accept { background: var(--gorun-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-        /* Mobile Responsive */
+        /* Task Item Styling */
+        .task-list { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; border: 1px solid #f1f5f9; cursor: pointer; margin-bottom: 10px; }
+        .task-item input { width: 18px; height: 18px; accent-color: var(--gorun-green); }
+
         @media (max-width: 768px) {
             .sidebar { width: 70px; padding: 20px 10px; }
             .sidebar .nav-item span, .logo { display: none; }
@@ -103,7 +107,6 @@
                 <div class="balance">৳ 4,520.00</div>
                 <button class="btn-withdraw"><i class="fas fa-money-bill-transfer"></i> Withdraw</button>
             </div>
-            
             <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
                 <p style="color: #64748b; font-size: 14px;">Tasks Completed</p>
                 <h3 style="font-size: 28px;">24</h3>
@@ -113,8 +116,38 @@
             </div>
         </div>
 
+        <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
+        <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
+            <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
+                <i class="fas fa-map-marker-alt"></i> At: Creative IT Institute
+            </div>
+            <h1 style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">02:15:42</h1>
+            <p style="color: #64748b; margin-bottom: 20px;">Shift Started: 10:00 AM</p>
+            <button style="width: 100%; max-width: 300px; background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 10px;">
+                <i class="fas fa-qrcode"></i> Scan QR to Check-out
+            </button>
+        </div>
+
+        <div class="card-title"><i class="fas fa-tasks" style="color: #3b82f6;"></i> Assigned Tasks</div>
+        <div class="task-list">
+            <label class="task-item">
+                <input type="checkbox" checked>
+                <span style="text-decoration: line-through; color: #94a3b8;">Report to Reception & QR Scan</span>
+            </label>
+            <label class="task-item">
+                <input type="checkbox">
+                <span>Organize Participant Files</span>
+            </label>
+            <label class="task-item">
+                <input type="checkbox">
+                <span>Assist in Spot Admission Desk</span>
+            </label>
+            <div style="margin-top: 15px; text-align: right; font-size: 13px; color: #64748b;">
+                Progress: <b>33% Completed</b>
+            </div>
+        </div>
+
         <div class="card-title"><i class="fas fa-bell" style="color: #f59e0b;"></i> New Job Requests</div>
-        
         <div class="job-request">
             <div class="job-info">
                 <h5>Corporate Event Support</h5>
@@ -131,7 +164,5 @@
             <button class="btn-accept" style="background: #3b82f6;">Accept</button>
         </div>
 
-    </div>
-
-</body>
+    </div> </body>
 </html>

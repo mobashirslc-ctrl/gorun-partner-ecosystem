@@ -3,34 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merchant Panel - GORUN</title>
+    <title>Merchant Dashboard - GORUN</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f1f5f9; display: flex; }
-        .sidebar { width: 260px; height: 100vh; background: white; border-right: 1px solid #e2e8f0; padding: 30px; position: fixed; }
-        .main { margin-left: 320px; padding: 40px; width: 100%; }
-        .logo-s { width: 80px; margin-bottom: 20px; }
-        .badge { background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
-        .box { background: white; padding: 30px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2e8f0; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f8fafc; display: flex; }
+        .sidebar { width: 280px; height: 100vh; background: white; border-right: 1px solid #e2e8f0; padding: 30px; position: fixed; }
+        .main { margin-left: 280px; padding: 40px; width: 100%; }
+        .logo-s { width: 100px; margin-bottom: 20px; }
+        .badge { background: #dcfce7; color: #166534; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; }
+        .box { background: white; padding: 30px; border-radius: 20px; margin-top: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .menu-item { padding: 12px; margin: 5px 0; border-radius: 8px; cursor: pointer; color: #475569; }
+        .menu-item:hover { background: #f1f5f9; color: #008f51; }
+        .active { background: #f0fdf4; color: #008f51; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-<img src="../assets/img/logo.png" alt="GORUN Logo" style="width: 100px;">
+    <img src="../assets/img/logo.png" class="logo-s" alt="GORUN Logo">
     <h3 id="shopName">Loading...</h3>
-    <p id="catText" style="color: #64748b; font-size: 0.9rem;"></p>
-    <hr>
-    <p>Dashboard</p>
-    <p id="invMenu">Inventory</p>
-    <p>Hire Staff</p>
-    <p style="color:red; cursor:pointer; margin-top:50px;" onclick="logout()">Logout</p>
+    <p id="catText" style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;"></p>
+    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin-bottom: 20px;">
+    
+    <div class="menu-item active">Dashboard</div>
+    <div class="menu-item" id="invMenu">Inventory Management</div>
+    <div class="menu-item">Staff Hiring</div>
+    <div class="menu-item">Settings</div>
+    <div class="menu-item" style="color:red; margin-top:50px;" onclick="logout()">Logout</div>
 </div>
 
 <div class="main">
-    <h1>Welcome, <span id="welcomeName">---</span></h1>
-    <span id="badge" class="badge">Category</span>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Welcome, <span id="welcomeName">---</span></h1>
+        <span id="badge" class="badge">---</span>
+    </div>
 
     <div id="contentBox" class="box">
         </div>
@@ -43,6 +50,8 @@
 
     db.ref('gorun_merchants/' + user).once('value').then(snap => {
         const d = snap.val();
+        if(!d) logout();
+
         document.getElementById('shopName').innerText = d.shopName;
         document.getElementById('welcomeName').innerText = d.shopName;
         document.getElementById('badge').innerText = d.category;
@@ -50,10 +59,21 @@
 
         const box = document.getElementById('contentBox');
         if(d.category === "Corporate") {
-            box.innerHTML = "<h2>Corporate Staffing Dashboard</h2><p>Hire skilled professionals for your office on an hourly basis.</p>";
+            box.innerHTML = `
+                <h2 style="color:#008f51">Corporate Services</h2>
+                <p>Hire skilled staff and manage office logistics on a per-hour basis.</p>
+                <button style="margin-top:20px; padding:10px 20px; background:#008f51; color:white; border:none; border-radius:8px;">Find Staff</button>
+            `;
             document.getElementById('invMenu').style.display = 'none';
         } else {
-            box.innerHTML = "<h2>" + d.category + " Inventory</h2><p>Manage your stocks and local logistics from here.</p>";
+            box.innerHTML = `
+                <h2 style="color:#008f51">${d.category} Inventory</h2>
+                <p>Track your stock, manage orders, and local deliveries.</p>
+                <div style="display:flex; gap:20px; margin-top:20px;">
+                    <div style="flex:1; background:#f8fafc; padding:20px; border-radius:12px;"><h3>0</h3><p>Active Orders</p></div>
+                    <div style="flex:1; background:#f8fafc; padding:20px; border-radius:12px;"><h3>0</h3><p>Out of Stock</p></div>
+                </div>
+            `;
         }
     });
 

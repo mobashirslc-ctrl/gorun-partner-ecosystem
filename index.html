@@ -9,86 +9,187 @@
     <style>
         :root { --gorun-green: #008f51; --dark-shade: #004d2c; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
         body {
             background: linear-gradient(135deg, var(--gorun-green) 0%, var(--dark-shade) 100%);
             min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
         }
+
         .main-wrapper {
-            display: flex; width: 100%; max-width: 1100px; background: rgba(255, 255, 255, 0.1);
+            display: flex; width: 100%; max-width: 1150px; background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 30px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.3);
         }
-        .left-side { flex: 1.1; padding: 30px; display: flex; align-items: center; }
-        .design-border { width: 100%; height: 500px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 20px; overflow: hidden; }
-        .design-border img { width: 100%; height: 100%; object-fit: cover; }
-        .right-side { flex: 0.9; background: #ffffff; padding: 40px; display: flex; flex-direction: column; }
-        .brand-header { text-align: center; margin-bottom: 20px; }
-        .brand-header img { width: 80px; }
-        .brand-header h1 { color: var(--gorun-green); font-size: 26px; font-weight: 900; }
-        .input-box { margin-bottom: 15px; }
+
+        .left-side { flex: 1.2; display: flex; align-items: stretch; background: #000; }
+        .left-side img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .right-side { flex: 0.8; background: #ffffff; padding: 30px; display: flex; flex-direction: column; height: 650px; overflow-y: auto; }
+        
+        /* স্লাইডিং বাটন ডিজাইন */
+        .form-toggle {
+            display: flex; background: #f1f5f9; border-radius: 12px; padding: 5px; margin-bottom: 25px; position: relative;
+        }
+        .form-toggle button {
+            flex: 1; border: none; background: none; padding: 12px; cursor: pointer; font-weight: 700;
+            font-size: 14px; position: relative; z-index: 1; transition: 0.3s; color: #64748b;
+        }
+        .form-toggle button.active { color: white; }
+        .toggle-bg {
+            position: absolute; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 100px); /* JS will handle this */
+            height: 40px; background: var(--gorun-green); border-radius: 10px; transition: 0.3s; z-index: 0;
+        }
+
+        .brand-header { text-align: center; margin-bottom: 15px; }
+        .brand-header img { width: 60px; }
+
+        .form-container { display: none; }
+        .form-container.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-box { margin-bottom: 12px; }
         .input-box label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 700; color: #334155; }
-        .input-box input, .input-box select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; }
-        .reg-btn { width: 100%; padding: 15px; background: var(--gorun-green); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-        @media (max-width: 900px) { .left-side { display: none; } }
+        .input-box input, .input-box select, .input-box textarea { 
+            width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #f8fafc;
+        }
+        .btn-action { 
+            width: 100%; padding: 14px; background: var(--gorun-green); color: white; 
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer; margin-top: 10px;
+        }
+
+        .form-check { display: flex; gap: 8px; font-size: 12px; color: #64748b; margin-bottom: 15px; }
+
+        @media (max-width: 950px) { .left-side { display: none; } .main-wrapper { max-width: 450px; } }
     </style>
 </head>
 <body>
 
 <div class="main-wrapper">
     <div class="left-side">
-        <div class="design-border">
-            <img src="assets/img/gorun thambile 345-01.jpg" alt="GORUN Banner">
-        </div>
+        <img src="assets/img/gorun thambile 345-01.jpg" alt="GORUN Banner">
     </div>
 
     <div class="right-side">
         <div class="brand-header">
             <img src="assets/img/logo.png" alt="GORUN Logo">
-            <h1>GORUN</h1>
+            <h1 style="color:var(--gorun-green); font-size: 22px;">Partner Portal</h1>
         </div>
 
-        <form id="regForm">
-            <div class="input-box">
-                <label>Shop Name *</label>
-                <input type="text" id="shopName" placeholder="Enter Shop Name" required>
-            </div>
-            <div class="input-box">
-                <label>Contact No (Username) *</label>
-                <input type="tel" id="phone" placeholder="017XXXXXXXX" required>
-            </div>
-            <div class="input-box">
-                <label>Merchant Type *</label>
-                <select id="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Groceries">Groceries</option>
-                    <option value="Pharmacy">Pharmacy</option>
-                    <option value="Corporate">Corporate</option>
-                </select>
-            </div>
-            <div class="input-box">
-                <label>Password *</label>
-                <input type="password" id="pass" required>
-            </div>
-            <button type="submit" class="reg-btn">Create Partner Account</button>
-        </form>
+        <div class="form-toggle">
+            <div class="toggle-bg" id="toggleBg"></div>
+            <button id="loginTab" class="active" onclick="switchForm('login')">Log In</button>
+            <button id="regTab" onclick="switchForm('reg')">Registration</button>
+        </div>
+
+        <div id="loginSection" class="form-container active">
+            <form id="loginForm">
+                <div class="input-box">
+                    <label>Phone Number</label>
+                    <input type="tel" id="loginPhone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="input-box">
+                    <label>Password</label>
+                    <input type="password" id="loginPass" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-action">Log In</button>
+            </form>
+        </div>
+
+        <div id="regSection" class="form-container">
+            <form id="regForm">
+                <div class="input-box">
+                    <label>Shop Name *</label>
+                    <input type="text" id="shopName" placeholder="Business Name" required>
+                </div>
+                <div class="input-box">
+                    <label>Contact No *</label>
+                    <input type="tel" id="phone" placeholder="01XXXXXXXXX" required>
+                </div>
+                <div class="input-box">
+                    <label>Shop Type *</label>
+                    <select id="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Pharmacy">Pharmacy</option>
+                        <option value="Food">Food</option>
+                        <option value="Fashion">Fashion</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Corporate">Corporate</option>
+                    </select>
+                </div>
+                <div class="input-box">
+                    <label>Address *</label>
+                    <textarea id="address" placeholder="Full Address" required></textarea>
+                </div>
+                <div class="input-box">
+                    <label>Set Password *</label>
+                    <input type="password" id="pass" required>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" required>
+                    <label>I agree to GORUN's <a href="#">Terms & Privacy</a></label>
+                </div>
+                <button type="submit" class="btn-action">Create Account</button>
+            </form>
+        </div>
     </div>
 </div>
 
 <script src="config.js"></script>
 <script>
+    // স্লাইডিং লজিক
+    function switchForm(type) {
+        const bg = document.getElementById('toggleBg');
+        const loginBtn = document.getElementById('loginTab');
+        const regBtn = document.getElementById('regTab');
+        const loginSec = document.getElementById('loginSection');
+        const regSec = document.getElementById('regSection');
+
+        if(type === 'login') {
+            bg.style.left = '5px';
+            loginBtn.classList.add('active');
+            regBtn.classList.remove('active');
+            loginSec.classList.add('active');
+            regSec.classList.remove('active');
+        } else {
+            bg.style.left = '50%';
+            regBtn.classList.add('active');
+            loginBtn.classList.remove('active');
+            regSec.classList.add('active');
+            loginSec.classList.remove('active');
+        }
+    }
+
+    // Firebase Registration
     document.getElementById('regForm').onsubmit = function(e) {
         e.preventDefault();
         const phone = document.getElementById('phone').value;
         const data = {
             shopName: document.getElementById('shopName').value,
             category: document.getElementById('category').value,
+            address: document.getElementById('address').value,
             pass: document.getElementById('pass').value
         };
-
-        // Firebase-এ ডাটা সেভ করা
         db.ref('gorun_merchants/' + phone).set(data).then(() => {
             localStorage.setItem('gorun_user', phone);
-            window.location.href = "dashboard/index.html"; // ড্যাশবোর্ড পাথে নিয়ে যাবে
+            window.location.href = "dashboard/index.html";
+        });
+    };
+
+    // Firebase Login
+    document.getElementById('loginForm').onsubmit = function(e) {
+        e.preventDefault();
+        const phone = document.getElementById('loginPhone').value;
+        const pass = document.getElementById('loginPass').value;
+
+        db.ref('gorun_merchants/' + phone).once('value').then(snap => {
+            if(snap.exists() && snap.val().pass === pass) {
+                localStorage.setItem('gorun_user', phone);
+                window.location.href = "dashboard/index.html";
+            } else {
+                alert("Invalid Credentials!");
+            }
         });
     };
 </script>

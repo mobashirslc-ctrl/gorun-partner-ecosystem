@@ -74,3 +74,19 @@ body {
         flex: 1;
     }
 }
+.banner-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* এটি ইমেজকে ক্রপ না করে সুন্দরভাবে সেট করবে */
+    display: block;
+}
+.input-box textarea { 
+    width: 100%; 
+    padding: 10px; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 8px; 
+    font-size: 14px; 
+    background: #f8fafc;
+    height: 80px; /* এটি যোগ করুন */
+    resize: none; 
+}

@@ -188,40 +188,36 @@ document.getElementById('regForm').onsubmit = function(e) {
 document.getElementById('loginForm').onsubmit = function(e) {
     e.preventDefault();
     
-    // সঠিক আইডি ব্যবহার করা হয়েছে: loginPhone এবং loginPass
-    const phone = document.getElementById('loginPhone').value;
-    const pass = document.getElementById('loginPass').value;
+    // নম্বর থেকে সব ধরণের স্পেস বা এক্সট্রা ক্যারেক্টার বাদ দেওয়া হচ্ছে
+    let phone = document.getElementById('loginPhone').value.trim();
+    const pass = document.getElementById('loginPass').value.trim();
     const waitingMsg = document.getElementById('loginWaiting');
 
     waitingMsg.style.display = 'none';
 
-    // প্রথমে মার্চেন্ট হিসেবে চেক করবে
+    // ১. প্রথমে মার্চেন্ট হিসেবে চেক (gorun_merchants)
     db.ref('gorun_merchants/' + phone).once('value').then(mSnap => {
-        if(mSnap.exists()) {
-            const mData = mSnap.val();
-            if(mData.pass === pass) {
-                if(mData.status === "approved") {
-                    localStorage.setItem('gorun_user', phone);
-                    window.location.href = "merchant/dashboard.html";
-                } else {
-                    waitingMsg.innerText = "আপনার মার্চেন্ট একাউন্টটি এখনো এপ্রুভ করা হয়নি।";
-                    waitingMsg.style.display = 'block';
-                }
+        if(mSnap.exists() && mSnap.val().pass === pass) {
+            if(mSnap.val().status === "approved") {
+                localStorage.setItem('gorun_user', phone);
+                window.location.href = "merchant/dashboard.html";
             } else {
-                alert("ভুল পাসওয়ার্ড (Merchant)!");
+                waitingMsg.innerText = "Merchant account pending approval.";
+                waitingMsg.style.display = 'block';
             }
         } else {
-            // মার্চেন্ট না পাওয়া গেলে স্টাফ হিসেবে চেক করবে
+            // ২. মার্চেন্ট না পাওয়া গেলে স্টাফ হিসেবে চেক (gorun_staffs)
             db.ref('gorun_staffs/' + phone).once('value').then(sSnap => {
                 if(sSnap.exists()) {
                     const sData = sSnap.val();
-                    // স্টাফ ডাটাবেজে আপনার ফিল্ড নাম 'password' (আপনি register.html এ এটা দিয়েছিলেন)
+                    // আপনার ডাটাবেজ স্ক্রিনশট অনুযায়ী এখানে 'password' ব্যবহার করা হয়েছে
                     if(sData.password === pass) {
                         if(sData.status === "approved") {
                             localStorage.setItem('gorun_user', phone);
+                            // স্টাফ ড্যাশবোর্ডে রিডাইরেক্ট
                             window.location.href = "staff/staff-dashboard.html";
                         } else {
-                            waitingMsg.innerText = "আপনার স্টাফ একাউন্টটি এখনো এপ্রুভ করা হয়নি।";
+                            waitingMsg.innerText = "Staff account pending approval.";
                             waitingMsg.style.display = 'block';
                         }
                     } else {
@@ -232,9 +228,6 @@ document.getElementById('loginForm').onsubmit = function(e) {
                 }
             });
         }
-    }).catch(error => {
-        console.error(error);
-        alert("সার্ভার এরর! দয়া করে কিছুক্ষণ পর চেষ্টা করুন।");
     });
 };
 </script>

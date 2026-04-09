@@ -6,39 +6,16 @@
     <title>Staff Dashboard | GORUN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { 
-            --gorun-green: #008f51; 
-            --dark-blue: #0f172a; 
-            --light-bg: #f8fafc;
-            --sidebar-width: 260px;
-        }
-
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --light-bg: #f8fafc; --sidebar-width: 260px; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); display: flex; }
-
-        /* Sidebar Style */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--dark-blue);
-            height: 100vh;
-            color: white;
-            padding: 30px 20px;
-            position: fixed;
-            transition: 0.3s;
-        }
-
+        .sidebar { width: var(--sidebar-width); background: var(--dark-blue); height: 100vh; color: white; padding: 30px 20px; position: fixed; z-index: 100; }
         .logo { font-size: 24px; font-weight: 800; color: var(--gorun-green); margin-bottom: 40px; }
-        
         .nav-menu { list-style: none; }
         .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #94a3b8; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: rgba(0, 143, 81, 0.1); color: var(--gorun-green); }
-
-        /* Main Content */
-        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 30px; }
-
-        /* Top Header & Toggle */
+        .nav-item.active { background: rgba(0, 143, 81, 0.1); color: var(--gorun-green); }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 30px; min-height: 100vh; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
         .switch-container { display: flex; align-items: center; gap: 10px; background: white; padding: 8px 15px; border-radius: 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -46,34 +23,14 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--gorun-green); }
         input:checked + .slider:before { transform: translateX(22px); }
-
-        /* Wallet & Stats Card */
         .stats-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        
-        .wallet-card { background: linear-gradient(135deg, var(--gorun-green), #007a45); color: white; padding: 25px; border-radius: 20px; position: relative; overflow: hidden; }
-        .wallet-card h4 { font-size: 14px; opacity: 0.9; }
+        .wallet-card { background: linear-gradient(135deg, var(--gorun-green), #007a45); color: white; padding: 25px; border-radius: 20px; }
         .balance { font-size: 32px; font-weight: 800; margin: 10px 0; }
-        .btn-withdraw { background: white; color: var(--gorun-green); border: none; padding: 8px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .btn-withdraw:hover { transform: scale(1.05); }
-
-        /* Cards and Titles */
+        .btn-withdraw { background: white; color: var(--gorun-green); border: none; padding: 8px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
         .card-title { font-size: 18px; font-weight: 700; margin-top: 25px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .job-request { background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--gorun-green); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .job-info h5 { font-size: 16px; margin-bottom: 5px; }
-        .job-info p { font-size: 13px; color: #64748b; }
-        .btn-accept { background: var(--gorun-green); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-        /* Task Item Styling */
         .task-list { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .task-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; border: 1px solid #f1f5f9; cursor: pointer; margin-bottom: 10px; }
-        .task-item input { width: 18px; height: 18px; accent-color: var(--gorun-green); }
-
-        @media (max-width: 768px) {
-            .sidebar { width: 70px; padding: 20px 10px; }
-            .sidebar .nav-item span, .logo { display: none; }
-            .main-content { margin-left: 70px; }
-            .stats-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar span, .logo { display: none; } .main-content { margin-left: 70px; } .stats-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -91,11 +48,11 @@
 
     <div class="main-content">
         <div class="top-header">
-            <h2>Hello, Mobashir!</h2>
+            <h2 id="display-name">Hello, Mobashir!</h2>
             <div class="switch-container">
                 <span style="font-size: 14px; font-weight: 600;">Active Status</span>
                 <label class="switch">
-                    <input type="checkbox" checked>
+                    <input type="checkbox" id="status-toggle" checked>
                     <span class="slider"></span>
                 </label>
             </div>
@@ -104,65 +61,156 @@
         <div class="stats-grid">
             <div class="wallet-card">
                 <h4>Total Balance</h4>
-                <div class="balance">৳ 4,520.00</div>
+                <div class="balance" id="wallet-balance">৳ 0.00</div>
                 <button class="btn-withdraw"><i class="fas fa-money-bill-transfer"></i> Withdraw</button>
             </div>
             <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
                 <p style="color: #64748b; font-size: 14px;">Tasks Completed</p>
-                <h3 style="font-size: 28px;">24</h3>
+                <h3 id="tasks-count" style="font-size: 28px;">0</h3>
                 <hr style="margin: 10px 0; opacity: 0.1;">
                 <p style="color: #64748b; font-size: 14px;">Rating</p>
                 <h3 style="color: #f59e0b;"><i class="fas fa-star"></i> 4.9</h3>
             </div>
         </div>
 
-        <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
-        <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
-            <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
-                <i class="fas fa-map-marker-alt"></i> At: Creative IT Institute
+        <div id="active-job-card-container"> <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
+            <div id="active-job-card" style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
+                <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
+                    <i class="fas fa-map-marker-alt"></i> At: <span id="job-location">Searching...</span>
+                </div>
+                <h1 id="timer-display" style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">00:00:00</h1>
+                <p id="shift-start-time" style="font-size: 14px; color: #64748b; margin-bottom: 20px;">Shift Started: --:--</p>
+                <button id="qr-action-btn" style="width: 100%; max-width: 300px; background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 10px;">
+                    <i class="fas fa-qrcode"></i> Scan QR to Check-out
+                </button>
             </div>
-            <h1 style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">02:15:42</h1>
-            <p style="color: #64748b; margin-bottom: 20px;">Shift Started: 10:00 AM</p>
-            <button style="width: 100%; max-width: 300px; background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 10px;">
-                <i class="fas fa-qrcode"></i> Scan QR to Check-out
-            </button>
         </div>
 
         <div class="card-title"><i class="fas fa-tasks" style="color: #3b82f6;"></i> Assigned Tasks</div>
-        <div class="task-list">
-            <label class="task-item">
-                <input type="checkbox" checked>
-                <span style="text-decoration: line-through; color: #94a3b8;">Report to Reception & QR Scan</span>
-            </label>
-            <label class="task-item">
-                <input type="checkbox">
-                <span>Organize Participant Files</span>
-            </label>
-            <label class="task-item">
-                <input type="checkbox">
-                <span>Assist in Spot Admission Desk</span>
-            </label>
-            <div style="margin-top: 15px; text-align: right; font-size: 13px; color: #64748b;">
-                Progress: <b>33% Completed</b>
-            </div>
-        </div>
+        <div class="task-list" id="task-container"></div>
 
         <div class="card-title"><i class="fas fa-bell" style="color: #f59e0b;"></i> New Job Requests</div>
-        <div class="job-request">
-            <div class="job-info">
-                <h5>Corporate Event Support</h5>
-                <p><i class="fas fa-map-marker-alt"></i> Banani, Dhaka • <i class="fas fa-clock"></i> 4 Hours • <b>৳200/hr</b></p>
-            </div>
-            <button class="btn-accept">Accept</button>
-        </div>
+        <div id="requests-container"></div>
+    </div>
 
-        <div class="job-request" style="border-left-color: #3b82f6;">
-            <div class="job-info">
-                <h5>Data Entry - Urgent</h5>
-                <p><i class="fas fa-map-marker-alt"></i> Gulshan 1 • <i class="fas fa-clock"></i> 6 Hours • <b>৳180/hr</b></p>
-            </div>
-            <button class="btn-accept" style="background: #3b82f6;">Accept</button>
-        </div>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-    </div> </body>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+            authDomain: "life-gps-2c6d1.firebaseapp.com",
+            projectId: "life-gps-2c6d1",
+            storageBucket: "life-gps-2c6d1.firebasestorage.app",
+            messagingSenderId: "739534835153",
+            appId: "1:739534835153:web:77e6b1f6650fba5d7624f0",
+            measurementId: "G-TNBL8B9TFR"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const currentStaffId = "staff_mobashir_01"; 
+        let currentJobId = "JOB_456"; 
+
+        // --- 1. Active Status Toggle ---
+        const statusSwitch = document.querySelector('#status-toggle');
+        if(statusSwitch) {
+            statusSwitch.addEventListener('change', (e) => {
+                db.collection("staffs").doc(currentStaffId).set({
+                    isActive: e.target.checked,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            });
+        }
+
+        // --- 2. Live Job & Timer Sync ---
+        function syncJobData() {
+            db.collection("jobs").doc(currentJobId).onSnapshot((doc) => {
+                const container = document.getElementById('active-job-card-container');
+                if (doc.exists) {
+                    const data = doc.data();
+                    if(data.status === "completed") {
+                        container.style.display = 'none';
+                        return;
+                    }
+                    container.style.display = 'block';
+                    document.getElementById('job-location').innerText = data.location || "N/A";
+                    
+                    if(data.startTime) {
+                        const startTime = data.startTime.toDate();
+                        document.getElementById('shift-start-time').innerText = `Shift Started: ${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        startLiveTimer(startTime);
+                    }
+                    renderTasks(data.tasks || []);
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        }
+
+        // --- 3. Task UI Rendering & Progress ---
+        function renderTasks(tasks) {
+            const taskContainer = document.getElementById('task-container');
+            if(!taskContainer) return;
+
+            taskContainer.innerHTML = ''; 
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('label');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="updateTaskStatus(${index}, this.checked)">
+                    <span style="${task.completed ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${task.title}</span>
+                `;
+                taskContainer.appendChild(taskItem);
+            });
+
+            const completed = tasks.filter(t => t.completed).length;
+            const percent = tasks.length > 0 ? Math.round((completed / tasks.length) * 100) : 0;
+            const progressDiv = document.createElement('div');
+            progressDiv.style = "text-align: right; font-size: 12px; color: #64748b; margin-top: 15px;";
+            progressDiv.innerHTML = `Progress: ${percent}% Completed`;
+            taskContainer.appendChild(progressDiv);
+        }
+
+        // --- 4. Wallet & Profile Sync ---
+        function syncWallet() {
+            db.collection("staffs").doc(currentStaffId).onSnapshot((doc) => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('wallet-balance').innerText = `৳ ${(data.balance || 0).toLocaleString()}`;
+                    document.getElementById('display-name').innerText = `Hello, ${data.name || 'Mobashir'}!`;
+                    document.getElementById('tasks-count').innerText = data.tasksCompleted || 0;
+                }
+            });
+        }
+
+        // --- 5. Database Task Update ---
+        window.updateTaskStatus = function(index, isCompleted) {
+            db.collection("jobs").doc(currentJobId).get().then(doc => {
+                let tasks = doc.data().tasks;
+                tasks[index].completed = isCompleted;
+                db.collection("jobs").doc(currentJobId).update({ tasks: tasks });
+            });
+        };
+
+        // --- 6. Live Timer Execution ---
+        let timerInterval;
+        function startLiveTimer(startTime) {
+            if(timerInterval) clearInterval(timerInterval);
+            const timerEl = document.getElementById('timer-display');
+            timerInterval = setInterval(() => {
+                const diff = new Date() - startTime;
+                const hours = Math.floor(diff / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Initialize
+        syncJobData();
+        syncWallet();
+    </script>
+</body>
 </html>

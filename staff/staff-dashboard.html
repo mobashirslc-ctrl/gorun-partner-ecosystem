@@ -111,7 +111,7 @@
         const db = firebase.firestore();
 
         const currentStaffId = "staff_mobashir_01"; 
-        let currentJobId = "JOB_456"; 
+        let currentJobId = null;
 
         // --- 1. Active Status Toggle ---
         const statusSwitch = document.querySelector('#status-toggle');
@@ -124,16 +124,20 @@
             });
         }
 
-        // --- 2. Live Job & Timer Sync ---
-        function syncJobData() {
-            db.collection("jobs").doc(currentJobId).onSnapshot((doc) => {
+        // --- 2. Live Job Tracker (Dynamic Tracking) ---
+        function trackActiveJob() {
+            db.collection("jobs")
+              .where("assignedStaff", "==", currentStaffId)
+              .where("status", "==", "ongoing")
+              .onSnapshot((querySnapshot) => {
                 const container = document.getElementById('active-job-card-container');
-                if (doc.exists) {
+                const taskContainer = document.getElementById('task-container');
+                
+                if (!querySnapshot.empty) {
+                    const doc = querySnapshot.docs[0];
+                    currentJobId = doc.id; 
                     const data = doc.data();
-                    if(data.status === "completed") {
-                        container.style.display = 'none';
-                        return;
-                    }
+                    
                     container.style.display = 'block';
                     document.getElementById('job-location').innerText = data.location || "N/A";
                     
@@ -145,16 +149,18 @@
                     renderTasks(data.tasks || []);
                 } else {
                     container.style.display = 'none';
+                    currentJobId = null;
+                    taskContainer.innerHTML = '<p style="color: #94a3b8; padding: 20px; text-align: center;">No tasks assigned.</p>';
                 }
             });
         }
 
-        // --- 3. Task UI Rendering & Progress ---
+        // --- 3. Task UI Rendering ---
         function renderTasks(tasks) {
             const taskContainer = document.getElementById('task-container');
             if(!taskContainer) return;
-
             taskContainer.innerHTML = ''; 
+            
             tasks.forEach((task, index) => {
                 const taskItem = document.createElement('label');
                 taskItem.className = 'task-item';
@@ -181,20 +187,51 @@
                     document.getElementById('wallet-balance').innerText = `৳ ${(data.balance || 0).toLocaleString()}`;
                     document.getElementById('display-name').innerText = `Hello, ${data.name || 'Mobashir'}!`;
                     document.getElementById('tasks-count').innerText = data.tasksCompleted || 0;
+                    
+                    // Sync initial switch status
+                    if(statusSwitch) statusSwitch.checked = data.isActive;
                 }
             });
         }
 
-        // --- 5. Database Task Update ---
-        window.updateTaskStatus = function(index, isCompleted) {
-            db.collection("jobs").doc(currentJobId).get().then(doc => {
-                let tasks = doc.data().tasks;
-                tasks[index].completed = isCompleted;
-                db.collection("jobs").doc(currentJobId).update({ tasks: tasks });
+        // --- 5. Job Requests Loader ---
+        function loadJobRequests() {
+            const requestsContainer = document.getElementById('requests-container');
+            db.collection("jobs").where("status", "==", "open").onSnapshot((querySnapshot) => {
+                requestsContainer.innerHTML = ''; 
+                if(querySnapshot.empty) {
+                    requestsContainer.innerHTML = '<p style="color: #94a3b8; padding: 20px;">No new requests found.</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const job = doc.data();
+                    const jobDiv = document.createElement('div');
+                    jobDiv.className = 'job-request';
+                    // Inline style to match your UI image
+                    jobDiv.style = "background: white; padding: 20px; border-radius: 15px; border-left: 5px solid var(--gorun-green); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02);";
+                    jobDiv.innerHTML = `
+                        <div>
+                            <h5 style="font-weight:700;">${job.location}</h5>
+                            <p style="font-size:12px; color:#64748b;">Rate: ৳${job.rate || '200'}/hr</p>
+                        </div>
+                        <button class="btn-accept" style="background: var(--gorun-green); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="acceptJob('${doc.id}')">Accept</button>
+                    `;
+                    requestsContainer.appendChild(jobDiv);
+                });
             });
+        }
+
+        window.acceptJob = function(jobId) {
+            db.collection("jobs").doc(jobId).update({
+                assignedStaff: currentStaffId,
+                status: "ongoing",
+                startTime: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => { 
+                console.log("Job Accepted!"); 
+            }).catch(err => alert("Error: " + err.message));
         };
 
-        // --- 6. Live Timer Execution ---
+        // --- 6. Live Timer & Task Updates ---
         let timerInterval;
         function startLiveTimer(startTime) {
             if(timerInterval) clearInterval(timerInterval);
@@ -208,9 +245,19 @@
             }, 1000);
         }
 
-        // Initialize
-        syncJobData();
+        window.updateTaskStatus = function(index, isCompleted) {
+            if(!currentJobId) return;
+            db.collection("jobs").doc(currentJobId).get().then(doc => {
+                let tasks = doc.data().tasks;
+                tasks[index].completed = isCompleted;
+                db.collection("jobs").doc(currentJobId).update({ tasks: tasks });
+            });
+        };
+
+        // Initialize Everything
+        trackActiveJob();
         syncWallet();
+        loadJobRequests();
     </script>
 </body>
 </html>

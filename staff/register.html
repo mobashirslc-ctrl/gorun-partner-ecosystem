@@ -8,37 +8,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --bg: #f8fafc; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --bg: #f1f5f9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 40px 20px; }
-        .reg-container { background: white; width: 100%; max-width: 800px; padding: 50px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
-        
-        .header { text-align: center; margin-bottom: 40px; }
-        .header img { width: 55px; margin-bottom: 15px; }
-        .header h2 { color: var(--dark-blue); font-size: 30px; font-weight: 800; }
-        .header p { color: #64748b; margin-top: 8px; font-weight: 500; }
-
-        .form-section { margin-bottom: 35px; }
-        .section-title { font-size: 13px; color: var(--gorun-green); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; display: block; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-
-        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; font-weight: 700; color: var(--dark-blue); margin-bottom: 8px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; background: #fcfdfe; transition: 0.3s; color: #334155; }
-        input:focus { border-color: var(--gorun-green); outline: none; box-shadow: 0 0 0 4px rgba(0,143,81,0.1); background: white; }
-
-        /* Category Items like Partner Design */
-        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 10px; }
-        .check-item { display: flex; align-items: center; background: #f8fafc; padding: 12px 15px; border-radius: 12px; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
-        .check-item:hover { border-color: var(--gorun-green); }
-        .check-item input { width: auto; margin-right: 12px; accent-color: var(--gorun-green); }
-        .check-item span { font-size: 14px; font-weight: 600; color: #475569; }
-
-        .btn-submit { width: 100%; background: var(--gorun-green); color: white; padding: 18px; border: none; border-radius: 15px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,143,81,0.2); }
-        .btn-submit:hover { background: #007a45; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,143,81,0.3); }
-
-        @media (max-width: 600px) { .reg-container { padding: 30px 20px; } }
+        .reg-container { background: white; width: 100%; max-width: 900px; padding: 50px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
+        .header { text-align: center; margin-bottom: 35px; }
+        .header img { width: 55px; margin-bottom: 10px; }
+        .header h2 { color: var(--dark-blue); font-size: 28px; font-weight: 800; }
+        .section-title { font-size: 13px; color: var(--gorun-green); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin: 30px 0 15px; display: block; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; font-weight: 700; color: var(--dark-blue); margin-bottom: 6px; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fcfdfe; transition: 0.3s; }
+        input:focus { border-color: var(--gorun-green); outline: none; }
+        .file-upload { position: relative; border: 1.5px dashed #cbd5e1; padding: 10px; border-radius: 10px; text-align: center; font-size: 12px; color: #64748b; }
+        .file-upload input { position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer; }
+        .btn-submit { width: 100%; background: var(--gorun-green); color: white; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 30px; box-shadow: 0 4px 15px rgba(0,143,81,0.2); }
     </style>
 </head>
 <body>
@@ -46,57 +31,54 @@
 <div class="reg-container" id="regMain">
     <div class="header">
         <img src="../assets/img/logo.png" alt="GORUN">
-        <h2>Staff Onboarding</h2>
-        <p>Become a Qualified GORUN Expert</p>
+        <h2>Expert Registration</h2>
+        <p>Step 1: Complete Your Professional Profile</p>
     </div>
 
     <form id="staffRegForm">
-        <div class="form-section">
-            <span class="section-title">Personal Details</span>
-            <div class="input-grid">
-                <div class="input-group"><label>Full Name</label><input type="text" id="staffName" placeholder="e.g. Mr. Mobashir" required></div>
-                <div class="input-group"><label>Phone Number</label><input type="tel" id="staffPhone" placeholder="017XXXXXXXX" required></div>
-                <div class="input-group"><label>NID Number</label><input type="number" id="staffNID" placeholder="National ID Number" required></div>
-                <div class="input-group"><label>Password</label><input type="password" id="staffPass" placeholder="Set a strong password" required></div>
-            </div>
+        <span class="section-title">Personal Information</span>
+        <div class="input-grid">
+            <div class="input-group"><label>Full Name</label><input type="text" id="staffName" placeholder="e.g. Rakibul Hasan" required></div>
+            <div class="input-group"><label>Father's Name</label><input type="text" id="fatherName" required></div>
+            <div class="input-group"><label>Mother's Name</label><input type="text" id="motherName" required></div>
+            <div class="input-group"><label>Phone Number</label><input type="tel" id="staffPhone" placeholder="01XXXXXXXXX" required></div>
+            <div class="input-group"><label>Password</label><input type="password" id="staffPass" required></div>
+            <div class="input-group"><label>NID Number</label><input type="number" id="staffNID" required></div>
         </div>
 
-        <div class="form-section">
-            <span class="section-title">Professional Expertise</span>
-            <label>Work Categories (Select all that apply)</label>
-            <div class="category-grid">
-                <label class="check-item"><input type="checkbox" name="workCat" value="Corporate"> <span>Corporate</span></label>
-                <label class="check-item"><input type="checkbox" name="workCat" value="Medicine"> <span>Medicine</span></label>
-                <label class="check-item"><input type="checkbox" name="workCat" value="Groceries"> <span>Groceries</span></label>
-                <label class="check-item"><input type="checkbox" name="workCat" value="Food"> <span>Food & Service</span></label>
-                <label class="check-item"><input type="checkbox" name="workCat" value="Fashion"> <span>Fashion</span></label>
-                <label class="check-item"><input type="checkbox" name="workCat" value="Electronic"> <span>Electronics</span></label>
-            </div>
-
-            <div class="input-grid" style="margin-top: 25px;">
-                <div class="input-group"><label>Hourly Rate (৳)</label><input type="number" id="hourlyRate" placeholder="e.g. 300" required></div>
-                <div class="input-group">
-                    <label>Experience Level</label>
-                    <select id="experience" required>
-                        <option value="0-1">Junior (0-1 Year)</option>
-                        <option value="2-5">Mid-Level (2-5 Years)</option>
-                        <option value="5+">Senior (5+ Years)</option>
-                    </select>
-                </div>
-                <div class="input-group"><label>Key Skills</label><input type="text" id="keySkills" placeholder="e.g. Excel, Hardware, Management"></div>
-                <div class="input-group"><label>Education</label><input type="text" id="education" placeholder="e.g. BBA / Diploma"></div>
-            </div>
+        <span class="section-title">Address Details</span>
+        <div class="input-grid">
+            <div class="input-group"><label>Present Address</label><textarea id="presentAddress" rows="2" required></textarea></div>
+            <div class="input-group"><label>Permanent Address</label><textarea id="permanentAddress" rows="2" required></textarea></div>
         </div>
 
-        <div class="form-section">
-            <span class="section-title">Verification & Links</span>
+        <span class="section-title">Professional Background</span>
+        <div class="input-grid">
             <div class="input-group">
-                <label>Portfolio / CV Link (Google Drive)</label>
-                <input type="url" id="cvLink" placeholder="https://drive.google.com/your-cv">
+                <label>Target Expertise</label>
+                <select id="expertise" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="software_dev">Software Development</option>
+                    <option value="electrician">Electrician</option>
+                    <option value="plumber">Plumber</option>
+                    <option value="it_support">IT Support</option>
+                    <option value="logistics">Logistics Expert</option>
+                </select>
             </div>
+            <div class="input-group"><label>Years of Experience</label><input type="number" id="experience" placeholder="e.g. 3" required></div>
+            <div class="input-group"><label>Previous Platform</label><input type="text" id="prevPlatform" placeholder="e.g. Upwork / Local Company"></div>
+            <div class="input-group"><label>Current Platform</label><input type="text" id="currentPlatform" placeholder="Where you work now"></div>
         </div>
 
-        <button type="submit" class="btn-submit">Complete Registration</button>
+        <span class="section-title">Documents (PDF Only)</span>
+        <div class="input-grid">
+            <div class="input-group"><label>Your NID</label><div class="file-upload"><span id="l1">Click to Upload PDF</span><input type="file" id="pdfNid" accept=".pdf" onchange="document.getElementById('l1').innerText=this.files[0].name"></div></div>
+            <div class="input-group"><label>Nominee NID</label><div class="file-upload"><span id="l2">Click to Upload PDF</span><input type="file" id="pdfNominee" accept=".pdf" onchange="document.getElementById('l2').innerText=this.files[0].name"></div></div>
+            <div class="input-group"><label>Academic Certificate</label><div class="file-upload"><span id="l3">Click to Upload PDF</span><input type="file" id="pdfAcademic" accept=".pdf" onchange="document.getElementById('l3').innerText=this.files[0].name"></div></div>
+            <div class="input-group"><label>Professional CV</label><div class="file-upload"><span id="l4">Click to Upload PDF</span><input type="file" id="pdfCv" accept=".pdf" onchange="document.getElementById('l4').innerText=this.files[0].name"></div></div>
+        </div>
+
+        <button type="submit" class="btn-submit">Submit & Start Assessment</button>
     </form>
 </div>
 
@@ -105,39 +87,37 @@
     document.getElementById('staffRegForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const selectedCats = [];
-        document.querySelectorAll('input[name="workCat"]:checked').forEach(c => selectedCats.push(c.value));
-        if(selectedCats.length === 0) { alert("Please select at least one category"); return; }
-
         const phone = document.getElementById('staffPhone').value;
         const staffData = {
             name: document.getElementById('staffName').value,
+            father: document.getElementById('fatherName').value,
+            mother: document.getElementById('motherName').value,
             phone: phone,
             nid: document.getElementById('staffNID').value,
             password: document.getElementById('staffPass').value,
-            categories: selectedCats,
-            hourlyRate: document.getElementById('hourlyRate').value,
+            address: {
+                present: document.getElementById('presentAddress').value,
+                permanent: document.getElementById('permanentAddress').value
+            },
+            expertise: document.getElementById('expertise').value,
             experience: document.getElementById('experience').value,
-            skills: document.getElementById('keySkills').value,
-            education: document.getElementById('education').value,
-            cvLink: document.getElementById('cvLink').value,
-            status: "pending", 
-            rating: 5.0,
-            isLive: false,
+            background: {
+                previous: document.getElementById('prevPlatform').value,
+                current: document.getElementById('currentPlatform').value
+            },
+            status: "pending_review", // প্রাথমিক স্ট্যাটাস
+            isVerified: false,
+            onboardingStep: 1, // মানে রেজিস্ট্রেশন শেষ
             joinedDate: new Date().toISOString()
         };
 
+        // ফায়ারবেসে ডাটা সেভ
         db.ref('gorun_staffs/' + phone).set(staffData).then(() => {
-            document.getElementById('regMain').innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fa-solid fa-clock-rotate-left" style="font-size: 70px; color: #f59e0b; margin-bottom: 25px;"></i>
-                    <h2 style="color: var(--dark-blue);">Registration Submitted!</h2>
-                    <p style="color: #64748b; margin: 15px 0; font-size: 16px;">Your profile is under review. You'll be notified once the Admin approves your account.</p>
-                    <button onclick="window.location.href='../index.html'" style="background: var(--gorun-green); color: white; padding: 12px 30px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; margin-top: 10px;">Back to Login</button>
-                </div>`;
+            // সফল হলে আমরা তাকে ইন্টারভিউ পেজে নিয়ে যাবো
+            alert("Registration Step 1 Complete! Redirecting to Virtual Interview...");
+            window.location.href = "staff-interview.html?phone=" + phone + "&expertise=" + staffData.expertise;
         }).catch(err => alert("Error: " + err.message));
     });
 </script>
-
 </body>
 </html>

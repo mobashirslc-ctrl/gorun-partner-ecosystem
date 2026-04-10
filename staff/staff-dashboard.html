@@ -128,8 +128,10 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <script>
         const firebaseConfig = {
@@ -334,13 +336,42 @@ function trackOnboardingProgress(phone) {
 
         document.getElementById('qr-action-btn').onclick = openScanner;
 
+                // --- 5. Security & Initializations ---
         window.onload = function() {
-            syncWallet();
-            trackActiveJob();
-            loadJobRequests();
-            trackOnboardingProgress(currentStaffId); 
+            // ১. লোকাল স্টোরেজ থেকে ফোন নম্বর নেওয়া
+            const phone = localStorage.getItem('currentStaffId');
             
+            // লগইন করা না থাকলে সরাসরি লগইন পেজে পাঠিয়ে দিবে
+            if(!phone) { 
+                window.location.href = "staff-login.html"; 
+                return; 
+            }
+
+            // ২. রিয়েলটাইম ডাটাবেস থেকে ভেরিফিকেশন স্ট্যাটাস চেক
+            firebase.database().ref('gorun_staffs/' + phone).get().then(snapshot => {
+                if(snapshot.exists()){
+                    const status = snapshot.val().onboarding_status;
+                    
+                    if(status !== "verified") {
+                        // ভেরিফাইড না হলে ড্যাশবোর্ড লক থাকবে এবং তাকে স্ট্যাটাস পেজে পাঠাবে
+                        alert("Access Denied! Your GORUN Badge is not verified yet.");
+                        window.location.href = "staff.html";
+                    } else {
+                        // ৩. শুধুমাত্র ভেরিফাইড হলেই নিচের এই মেইন ফাংশনগুলো চলবে
+                        syncWallet(phone);
+                        trackActiveJob(phone);
+                        loadJobRequests();
+                        trackOnboardingProgress(phone);
+                    }
+                } else {
+                    window.location.href = "staff-login.html";
+                }
+            }).catch(err => {
+                console.error("Auth Error:", err);
+                window.location.href = "staff-login.html";
+            });
         };
+
         // Logout Function
 function logoutStaff() {
     // ১. কনফার্মেশন মেসেজ

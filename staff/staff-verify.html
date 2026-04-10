@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Staff Control | GORUN</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 50px; background: #f4f7f6; }
+        .admin-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        select, input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+        button { background: #008f51; color: white; font-weight: bold; cursor: pointer; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>Staff Status Controller</h2>
+    <p>Staff ID: <strong>staff_mobashir_01</strong></p>
+    
+    <label>Change Onboarding Status:</label>
+    <select id="statusSelect">
+        <option value="pending_review">1. Pending Review</option>
+        <option value="interview_ready">2. Ready for Assessment</option>
+        <option value="exam_completed">3. Exam Done (Waiting for Interview)</option>
+        <option value="verified">4. Fully Verified (Badge Active)</option>
+    </select>
+
+    <label>Interview Link (for Step 3):</label>
+    <input type="text" id="meetLink" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+    
+    <button onclick="updateStaffStatus()">Update Status</button>
+</div>
+
+<script>
+    // Apnar firestore config ekhane thakbe
+    const firebaseConfig = {
+        apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+        authDomain: "life-gps-2c6d1.firebaseapp.com",
+        projectId: "life-gps-2c6d1",
+        storageBucket: "life-gps-2c6d1.firebasestorage.app",
+        messagingSenderId: "739534835153",
+        appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function updateStaffStatus() {
+        const newStatus = document.getElementById('statusSelect').value;
+        const link = document.getElementById('meetLink').value;
+        
+        const updateData = {
+            onboarding_status: newStatus
+        };
+
+        if(link) {
+            updateData.interview_link = link;
+            updateData.interview_time = "10:30 AM (Today)";
+        }
+
+        db.collection("staffs").doc("staff_mobashir_01").update(updateData)
+        .then(() => alert("Status Updated! Now check your Staff Dashboard."))
+        .catch(err => alert("Error: " + err.message));
+    }
+</script>
+</body>
+</html>

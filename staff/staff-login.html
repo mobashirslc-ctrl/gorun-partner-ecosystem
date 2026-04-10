@@ -27,65 +27,51 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="../config.js"></script>
     <script>
-        // Firebase Realtime Database reference
-        const rdb = firebase.database();
+    const db = firebase.database();
 
-        async function loginStaff() {
-    const phone = document.getElementById('logPhone').value;
-    const pass = document.getElementById('logPass').value;
+    async function loginStaff() {
+        const phone = document.getElementById('logPhone').value;
+        const pass = document.getElementById('logPass').value;
 
-    if(!phone || !pass) {
-        alert("Please enter phone and password!");
-        return;
-    }
-
-    try {
-        const snapshot = await firebase.database().ref('gorun_staffs/' + phone).get();
-        
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            
-            if (userData.password === pass) {
-                localStorage.setItem('currentStaffId', phone);
-                const status = userData.onboarding_status;
-                const expertise = userData.expertise;
-
-                // --- PROGRESS-BASED REDIRECT LOGIC ---
-                
-                if (!status || status === "registered") {
-                    // 1. Jodi shudhu registration kore thake, tobe Assessment-e jabe
-                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-                } 
-                else if (status === "exam_completed") {
-                    // 2. Jodi interview shesh hoye thake kintu mock test baki thake
-                    window.location.href = `mock-test.html?phone=${phone}`;
-                }
-                else if (status === "mock_completed" || status === "pending_review") {
-                    // 3. Jodi shob shesh hoye thake kintu admin verify koreni
-                    alert("Assessment complete. Waiting for Admin verification.");
-                    window.location.href = "staff.html"; 
-                }
-                else if (status === "verified") {
-                    // 4. Admin verify korlei kebol dashboard pabe
-                    window.location.href = "dashboard.html";
-                }
-                else {
-                    // Default redirect
-                    window.location.href = "staff.html";
-                }
-
-            } else {
-                alert("Incorrect Password!");
-            }
-        } else {
-            alert("User not found! Please register first.");
+        if(!phone || !pass) {
+            alert("Please enter phone and password!");
+            return;
         }
-    } catch (error) {
-        console.error(error);
-        alert("System Error! Check your internet.");
-    }
-}
 
-    </script>
+        try {
+            const snapshot = await db.ref('gorun_staffs/' + phone).get();
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                
+                if (userData.password === pass) {
+                    localStorage.setItem('currentStaffId', phone);
+                    
+                    // রেজিস্ট্রেশন কোডে আপনি 'status' ব্যবহার করেছেন, তাই এখানেও 'status' চেক হবে
+                    const status = userData.status; 
+                    const expertise = userData.expertise;
+
+                    if (status === "pending_review" || !status) {
+                        // যদি কেবল রেজিস্ট্রেশন করে থাকে, তবে ইন্টারভিউতে যাবে
+                        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                    } 
+                    else if (status === "verified") {
+                        window.location.href = "dashboard.html";
+                    }
+                    else {
+                        window.location.href = "staff.html"; 
+                    }
+                } else {
+                    alert("Incorrect Password!");
+                }
+            } else {
+                alert("User not found!");
+            }
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    }
+</script>
+
 </body>
 </html>

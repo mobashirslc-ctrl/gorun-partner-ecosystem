@@ -35,23 +35,31 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="../config.js"></script>
     <script>
-        function regCorp() {
-            const phone = document.getElementById('cPhone').value;
-            const pass = document.getElementById('cPass').value;
-            if(!phone || !pass) return alert("Fill all fields!");
+    const db = firebase.database();
 
-            firebase.database().ref('gorun_corporate/' + phone).set({
-                company: document.getElementById('cName').value,
-                phone: phone,
-                type: document.getElementById('cType').value,
-                password: pass,
-                status: "pending_review",
-                joinedAt: new Date().toISOString()
-            }).then(() => {
-                alert("Corporate Registration Complete! Admin will verify soon.");
-                window.location.href = "corporate-login.html";
-            });
-        }
-    </script>
+    function regCorp() {
+        const phone = document.getElementById('cPhone').value;
+        const pass = document.getElementById('cPass').value;
+        
+        if(!phone || !pass) return alert("Fill all fields!");
+
+        const corpData = {
+            company: document.getElementById('cName').value,
+            phone: phone,
+            type: document.getElementById('cType').value,
+            password: pass,
+            status: "pending_review", // অ্যাডমিন ভেরিফিকেশনের জন্য স্ট্যাটাস
+            role: "corporate",
+            joinedAt: new Date().toISOString()
+        };
+
+        db.ref('gorun_corporate/' + phone).set(corpData).then(() => {
+            alert("Registration Successful! Please wait for Admin Verification.");
+            // রেজিস্ট্রেশন শেষে তাকে একটি পেন্ডিং মেসেজ পেজে নিয়ে যান
+            window.location.href = "corporate-pending.html"; 
+        }).catch(e => alert(e.message));
+    }
+</script>
+
 </body>
 </html>

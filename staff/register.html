@@ -115,9 +115,11 @@
         db.ref('gorun_staffs/' + phone).set(staffData).then(() => {
             // সফল হলে আমরা তাকে ইন্টারভিউ পেজে নিয়ে যাবো
             alert("Registration Step 1 Complete! Redirecting to Virtual Interview...");
-            window.location.href = "staff-interview.html?phone=" + phone + "&expertise=" + staffData.expertise;
+            localStorage.setItem('currentStaffId', phone);
+       window.location.href = "staff-interview.html?phone=" + phone + "&expertise=" + staffData.expertise;
         }).catch(err => alert("Error: " + err.message));
     });
 </script>
 </body>
+        
 </html>

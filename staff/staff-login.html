@@ -23,28 +23,67 @@
         <a href="register.html" class="back-link">Don't have an account? Register</a>
     </div>
 
+        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="../config.js"></script>
     <script>
-        function loginStaff() {
+        // Firebase Realtime Database reference
+        const rdb = firebase.database();
+
+        async function loginStaff() {
             const phone = document.getElementById('logPhone').value;
             const pass = document.getElementById('logPass').value;
 
-            // Database চেক
-            db.ref('gorun_staffs/' + phone).once('value', (snapshot) => {
+            if(!phone || !pass) {
+                alert("Please fill in all fields!");
+                return;
+            }
+
+            try {
+                const snapshot = await rdb.ref('gorun_staffs/' + phone).get();
+                
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
+                    
+                    // পাসওয়ার্ড চেক
                     if (userData.password === pass) {
                         localStorage.setItem('currentStaffId', phone);
+                        
+                        const status = userData.onboarding_status;
+                        const expertise = userData.expertise;
+
                         alert("Login Successful!");
-                        window.location.href = "staff.html"; // এটি চেক করে ড্যাশবোর্ডে বা ইন্টারভিউতে পাঠাবে
+
+                        // আপনার কন্ডিশন অনুযায়ী রিডাইরেক্ট লজিক:
+                        if (!status || status === "registered") {
+                            // ইন্টারভিউ কমপ্লিট না হলে ইন্টারভিউ পেজে পাঠাবে
+                            window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                        } 
+                        else if (status === "pending_review") {
+                            // ইন্টারভিউ শেষ কিন্তু অ্যাডমিন অ্যাপ্রুভ করেনি
+                            alert("Assessment complete. Please wait for Admin verification.");
+                            window.location.href = "staff.html"; 
+                        }
+                        else if (status === "verified") {
+                            // শুধুমাত্র ভেরিফাইড হলেই ড্যাশবোর্ড দেখতে পারবে
+                            window.location.href = "dashboard.html";
+                        }
+                        else {
+                            // ডিফল্ট স্ট্যাটাস পেজ
+                            window.location.href = "staff.html";
+                        }
                     } else {
                         alert("Incorrect Password!");
                     }
                 } else {
                     alert("User not found! Please register first.");
                 }
-            });
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred. Check your internet connection.");
+            }
         }
     </script>
+
 </body>
 </html>

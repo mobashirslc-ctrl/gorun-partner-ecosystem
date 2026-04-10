@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Question Manager | GORUN Admin</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 40px; }
+        .admin-card { background: white; max-width: 600px; margin: auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        h2 { color: #0f172a; border-bottom: 2px solid #008f51; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        .btn-add { width: 100%; padding: 15px; background: #008f51; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-add:hover { background: #007542; }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2>Add New Assessment Question</h2>
+    
+    <div class="form-group">
+        <label>SELECT CATEGORY</label>
+        <select id="qCategory">
+            <option value="software_dev">Software Developer</option>
+            <option value="student_counselor">Student Counselor</option>
+            <option value="visa_expert">Visa Documentation Expert</option>
+            <option value="sales_marketing">Sales and Marketing</option>
+            </select>
+    </div>
+
+    <div class="form-group">
+        <label>QUESTION TEXT</label>
+        <textarea id="qText" rows="3" placeholder="Enter your question here..."></textarea>
+    </div>
+
+    <div class="form-group"><label>OPTION 1</label><input type="text" id="opt1"></div>
+    <div class="form-group"><label>OPTION 2</label><input type="text" id="opt2"></div>
+    <div class="form-group"><label>OPTION 3</label><input type="text" id="opt3"></div>
+
+    <div class="form-group">
+        <label>CORRECT OPTION</label>
+        <select id="correctIndex">
+            <option value="0">Option 1</option>
+            <option value="1">Option 2</option>
+            <option value="2">Option 3</option>
+        </select>
+    </div>
+
+    <button class="btn-add" onclick="saveQuestion()">Add to Question Pool</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="../config.js"></script> <script>
+    const db = firebase.firestore();
+
+    function saveQuestion() {
+        const category = document.getElementById('qCategory').value;
+        const qData = {
+            question: document.getElementById('qText').value,
+            options: [
+                document.getElementById('opt1').value,
+                document.getElementById('opt2').value,
+                document.getElementById('opt3').value
+            ],
+            correct: parseInt(document.getElementById('correctIndex').value),
+            createdAt: new Date().toISOString()
+        };
+
+        if(!qData.question || !qData.options[0]) return alert("Please fill all fields!");
+
+        // Firestore এ সেভ হচ্ছে
+        db.collection("question_pool").doc(category).collection("questions").add(qData)
+        .then(() => {
+            alert("Question Added Successfully!");
+            document.getElementById('qText').value = ""; // ফর্ম ক্লিয়ার করা
+            document.getElementById('opt1').value = "";
+            document.getElementById('opt2').value = "";
+            document.getElementById('opt3').value = "";
+        })
+        .catch(err => alert("Error: " + err.message));
+    }
+</script>
+
+</body>
+</html>

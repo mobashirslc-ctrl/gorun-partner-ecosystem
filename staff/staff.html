@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal | GORUN</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body style="background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;">
+    <div style="text-align: center;">
+        <div class="loader"></div>
+        <h2 id="status-msg">GORUN Expert Portal</h2>
+        <p id="sub-msg">Syncing your profile...</p>
+    </div>
+
+    <style>
+        .loader { border: 4px solid #1e293b; border-top: 4px solid #008f51; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+
+    <script>
+        // Firebase Config (আপনার কনফিগটি এখানে দিন)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+            authDomain: "life-gps-2c6d1.firebaseapp.com",
+            projectId: "life-gps-2c6d1",
+            storageBucket: "life-gps-2c6d1.firebasestorage.app",
+            messagingSenderId: "739534835153",
+            appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ১. চেক করা ইউজার আগে লগইন বা রেজিস্ট্রেশন করেছে কি না
+        const staffPhone = localStorage.getItem('currentStaffId');
+
+        if (!staffPhone) {
+            // কেউ প্রথমবার আসলে তাকে রেজিস্ট্রেশন পেজে পাঠানো হবে
+            window.location.href = "staff-register.html";
+        } else {
+            // ডাটাবেস থেকে বর্তমান অবস্থা চেক করা
+            db.collection("staffs").doc(staffPhone).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const status = data.onboarding_status;
+
+                    // ২. অনবোর্ডিং লজিক কন্ট্রোল
+                    if (status === "pending_review") {
+                        // রেজিস্ট্রেশন শেষ, এখন ইন্টারভিউ দিতে হবে
+                        window.location.href = `staff-interview.html?phone=${staffPhone}&expertise=${data.expertise}`;
+                    } 
+                    else if (status === "exam_completed" || status === "interview_ready") {
+                        // ইন্টারভিউ শেষ, এখন সে ড্যাশবোর্ডে গিয়ে ওয়েটিং স্ট্যাটাস দেখবে
+                        window.location.href = "staff-dashboard.html";
+                    }
+                    else if (status === "verified") {
+                        // সব ওকে, সরাসরি মেইন ড্যাশবোর্ড
+                        window.location.href = "staff-dashboard.html";
+                    }
+                } else {
+                    // যদি লোকাল স্টোরেজে আইডি থাকে কিন্তু ডাটাবেসে না থাকে
+                    localStorage.removeItem('currentStaffId');
+                    window.location.href = "staff-register.html";
+                }
+            }).catch(err => {
+                console.error(err);
+                document.getElementById('status-msg').innerText = "Connection Error!";
+            });
+        }
+    </script>
+</body>
+</html>

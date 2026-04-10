@@ -5,26 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expert Assessment | GORUN</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --gorun-green: #008f51; --dark: #0f172a; --error: #ef4444; }
         body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 20px; }
         .exam-card { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        
         .exam-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; }
         .timer-box { font-size: 20px; font-weight: 800; color: var(--error); background: #fef2f2; padding: 10px 20px; border-radius: 12px; border: 1px solid #fee2e2; }
-        
         .q-title { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 20px; line-height: 1.5; }
         .options-grid { display: grid; gap: 12px; }
         .option-item { display: block; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.3s; font-weight: 500; }
         .option-item:hover { border-color: var(--gorun-green); background: #f0fdf4; }
         .option-item input { margin-right: 10px; accent-color: var(--gorun-green); }
-
         .footer { display: flex; justify-content: space-between; margin-top: 30px; }
         .btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; }
         .btn-next { background: var(--gorun-green); color: white; }
         .btn-prev { background: #e2e8f0; color: var(--dark); }
+        .loading { text-align: center; font-weight: bold; padding: 50px; }
     </style>
 </head>
 <body>
@@ -32,14 +31,15 @@
 <div class="exam-card" id="examContainer">
     <div class="exam-header">
         <div>
-            <h3 id="categoryLabel">Loading Assessment...</h3>
-            <p id="qCounter" style="color: #64748b; font-size: 14px;">Question 1 of 10</p>
+            <h3 id="categoryLabel">Preparing Exam...</h3>
+            <p id="qCounter" style="color: #64748b; font-size: 14px;">Please wait</p>
         </div>
         <div class="timer-box" id="timer">15:00</div>
     </div>
 
     <div id="quizArea">
-        </div>
+        <div class="loading">Loading Questions from Cloud...</div>
+    </div>
 
     <div class="footer">
         <button class="btn btn-prev" id="prevBtn" onclick="prevQuestion()" style="visibility:hidden">Previous</button>
@@ -52,31 +52,48 @@
     const urlParams = new URLSearchParams(window.location.search);
     const phone = urlParams.get('phone');
     const expertise = urlParams.get('expertise');
+    
+    const db = firebase.firestore(); // প্রশ্ন থাকবে Firestore-এ
+    const rdb = firebase.database();  // ইউজারের ডাটা আপডেট হবে Realtime DB-তে
 
-    // ১. কোশ্চেন ব্যাংক (এখানে প্রতিটি ক্যাটাগরির জন্য আলাদা প্রশ্ন থাকবে)
-    const questionBank = {
-        "software_dev": [
-            { q: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Hyper Tabular Main Link"], a: 0 },
-            { q: "Which of these is a JavaScript Framework?", options: ["Laravel", "React", "Django"], a: 1 },
-            // এখানে ১০টি বা তার বেশি প্রশ্ন যুক্ত করবেন
-        ],
-        "electrician": [
-            { q: "What is the unit of electrical resistance?", options: ["Volt", "Ampere", "Ohm"], a: 2 },
-            { q: "Which tool is used to test live wires?", options: ["Tester", "Hammer", "Pliers"], a: 0 },
-        ]
-    };
-
-    let currentQuestions = questionBank[expertise] || questionBank["software_dev"];
+    let currentQuestions = [];
     let currentIndex = 0;
     let userAnswers = [];
-    let timeLeft = 15 * 60; // ১৫ মিনিট (সেকেন্ডে)। পরে এটি DB থেকে আনতে পারবেন।
+    let timeLeft = 15 * 60; 
+    let timerInterval;
+
+    // ১. Firestore থেকে ডাইনামিক প্রশ্ন নিয়ে আসা
+    async function startAssessment() {
+        if (!expertise) return alert("Expertise category missing!");
+
+        try {
+            const snapshot = await db.collection("question_pool").doc(expertise).collection("questions").get();
+            let pool = [];
+            snapshot.forEach(doc => pool.push(doc.data()));
+
+            if (pool.length < 10) {
+                alert("Insufficient questions in Admin Pool (Minimum 10 required). Contact Admin.");
+                window.location.href = "staff.html";
+                return;
+            }
+
+            // র‍্যান্ডম ১০টি প্রশ্ন সিলেক্ট করা
+            currentQuestions = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+            
+            document.getElementById('categoryLabel').innerText = expertise.replace('_', ' ').toUpperCase();
+            loadQuestion();
+            startTimer();
+        } catch (error) {
+            console.error("Fetch Error:", error);
+            alert("Error loading questions. Check Internet Connection.");
+        }
+    }
 
     function loadQuestion() {
         const q = currentQuestions[currentIndex];
-        document.getElementById('categoryLabel').innerText = expertise.replace('_', ' ').toUpperCase();
         document.getElementById('qCounter').innerText = `Question ${currentIndex + 1} of 10`;
         
-        let html = `<div class="q-title">${q.q}</div><div class="options-grid">`;
+        let html = `<div class="q-title">${q.question}</div><div class="options-grid">`;
         q.options.forEach((opt, index) => {
             html += `
                 <label class="option-item">
@@ -113,50 +130,52 @@
         }
     }
 
-    // ২. টাইমার লজিক
-    const timerInterval = setInterval(() => {
-        let mins = Math.floor(timeLeft / 60);
-        let secs = timeLeft % 60;
-        document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        
-        if(timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("Time's up! Your assessment is being submitted.");
-            submitResult();
-        }
-        timeLeft--;
-    }, 1000);
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time's up!");
+                submitResult();
+            }
+            timeLeft--;
+        }, 1000);
+    }
 
-    // ৩. রেজাল্ট সাবমিশন
     function submitResult() {
         clearInterval(timerInterval);
         
-        // স্কোর ক্যালকুলেশন
         let score = 0;
         userAnswers.forEach((ans, i) => {
-            if(ans == currentQuestions[i].a) score++;
+            if(ans == currentQuestions[i].correct) score++;
         });
 
         const updateData = {
             testScore: score,
-            onboarding_status: "exam_completed",
+            onboarding_status: "pending_review", // স্ট্যাটাস আপডেট যেন আবার পরীক্ষা দিতে না পারে
             examTime: new Date().toISOString()
         };
 
-        db.ref('gorun_staffs/' + phone).update(updateData).then(() => {
+        // Realtime Database এ আপডেট (আপনার gorun_staffs পাথ অনুযায়ী)
+        rdb.ref('gorun_staffs/' + phone).update(updateData).then(() => {
             document.getElementById('examContainer').innerHTML = `
                 <div style="text-align: center; padding: 20px;">
                     <i class="fas fa-check-circle" style="font-size: 60px; color: var(--gorun-green);"></i>
                     <h2 style="margin-top: 20px;">Assessment Completed!</h2>
-                    <p style="color: #64748b; margin: 15px 0;">Your score: ${score} out of ${currentQuestions.length}</p>
-                    <p>Our team will verify your documents and score for the GORUN Badge.</p>
-                    <button onclick="window.location.href='../index.html'" class="btn btn-next" style="margin-top: 20px;">Back to Login</button>
+                    <p style="color: #64748b; margin: 15px 0;">You scored ${score} out of 10</p>
+                    <p>Redirecting to status page...</p>
+                    <button onclick="window.location.href='staff.html'" class="btn btn-next" style="margin-top: 20px;">Check Status</button>
                 </div>
             `;
+            setTimeout(() => { window.location.href = "staff.html"; }, 5000);
         });
     }
 
-    window.onload = loadQuestion;
+    // উইন্ডো লোড হওয়ার সাথে সাথে স্টার্ট হবে
+    window.onload = startAssessment;
 </script>
 
 </body>

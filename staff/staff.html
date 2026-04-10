@@ -6,21 +6,21 @@
     <title>Staff Portal | GORUN</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loader { border: 3px solid #1e293b; border-top: 3px solid #008f51; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .container { text-align: center; }
+    </style>
 </head>
-<body style="background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div style="text-align: center;">
+<body>
+    <div class="container">
         <div class="loader"></div>
-        <h2 id="status-msg">GORUN Expert Portal</h2>
-        <p id="sub-msg">Syncing your profile...</p>
+        <p id="msg">Verifying session...</p>
     </div>
 
-    <style>
-        .loader { border: 4px solid #1e293b; border-top: 4px solid #008f51; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-
     <script>
-        // Firebase Config (আপনার কনফিগটি এখানে দিন)
+        // আপনার সঠিক Firebase Config এখানে দিন
         const firebaseConfig = {
             apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
             authDomain: "life-gps-2c6d1.firebaseapp.com",
@@ -29,44 +29,39 @@
             messagingSenderId: "739534835153",
             appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
 
-        // ১. চেক করা ইউজার আগে লগইন বা রেজিস্ট্রেশন করেছে কি না
-        const staffPhone = localStorage.getItem('currentStaffId');
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
 
-        if (!staffPhone) {
-            // কেউ প্রথমবার আসলে তাকে রেজিস্ট্রেশন পেজে পাঠানো হবে
-            window.location.href = "staff-register.html";
-        } else {
-            // ডাটাবেস থেকে বর্তমান অবস্থা চেক করা
-            db.collection("staffs").doc(staffPhone).get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    const status = data.onboarding_status;
+            const staffPhone = localStorage.getItem('currentStaffId');
 
-                    // ২. অনবোর্ডিং লজিক কন্ট্রোল
-                    if (status === "pending_review") {
-                        // রেজিস্ট্রেশন শেষ, এখন ইন্টারভিউ দিতে হবে
-                        window.location.href = `staff-interview.html?phone=${staffPhone}&expertise=${data.expertise}`;
-                    } 
-                    else if (status === "exam_completed" || status === "interview_ready") {
-                        // ইন্টারভিউ শেষ, এখন সে ড্যাশবোর্ডে গিয়ে ওয়েটিং স্ট্যাটাস দেখবে
-                        window.location.href = "staff-dashboard.html";
+            if (!staffPhone) {
+                // আইডি না থাকলে রেজিস্ট্রেশনে পাঠাবে
+                window.location.href = "register.html";
+            } else {
+                // ডাটাবেস চেক (Note: আপনার কালেকশন নাম 'staffs' না 'gorun_staffs' তা চেক করে নিন)
+                db.collection("staffs").doc(staffPhone).get().then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const status = data.onboarding_status || data.status;
+
+                        if (status === "pending_review") {
+                            window.location.href = `staff-interview.html?phone=${staffPhone}&expertise=${data.expertise}`;
+                        } else {
+                            window.location.href = "staff-dashboard.html";
+                        }
+                    } else {
+                        // ডাটাবেসে না থাকলে রেজিস্ট্রেশনে পাঠাবে
+                        localStorage.removeItem('currentStaffId');
+                        window.location.href = "register.html";
                     }
-                    else if (status === "verified") {
-                        // সব ওকে, সরাসরি মেইন ড্যাশবোর্ড
-                        window.location.href = "staff-dashboard.html";
-                    }
-                } else {
-                    // যদি লোকাল স্টোরেজে আইডি থাকে কিন্তু ডাটাবেসে না থাকে
-                    localStorage.removeItem('currentStaffId');
-                    window.location.href = "staff-register.html";
-                }
-            }).catch(err => {
-                console.error(err);
-                document.getElementById('status-msg').innerText = "Connection Error!";
-            });
+                }).catch(err => {
+                    document.getElementById('msg').innerText = "Database Error: " + err.message;
+                });
+            }
+        } catch (e) {
+            document.getElementById('msg').innerText = "Config Error: " + e.message;
         }
     </script>
 </body>

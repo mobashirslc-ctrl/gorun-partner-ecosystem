@@ -31,59 +31,61 @@
         const rdb = firebase.database();
 
         async function loginStaff() {
-            const phone = document.getElementById('logPhone').value;
-            const pass = document.getElementById('logPass').value;
+    const phone = document.getElementById('logPhone').value;
+    const pass = document.getElementById('logPass').value;
 
-            if(!phone || !pass) {
-                alert("Please fill in all fields!");
-                return;
-            }
+    if(!phone || !pass) {
+        alert("Please enter phone and password!");
+        return;
+    }
 
-            try {
-                const snapshot = await rdb.ref('gorun_staffs/' + phone).get();
+    try {
+        const snapshot = await firebase.database().ref('gorun_staffs/' + phone).get();
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            
+            if (userData.password === pass) {
+                localStorage.setItem('currentStaffId', phone);
+                const status = userData.onboarding_status;
+                const expertise = userData.expertise;
+
+                // --- PROGRESS-BASED REDIRECT LOGIC ---
                 
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    
-                    // পাসওয়ার্ড চেক
-                    if (userData.password === pass) {
-                        localStorage.setItem('currentStaffId', phone);
-                        
-                        const status = userData.onboarding_status;
-                        const expertise = userData.expertise;
-
-                        alert("Login Successful!");
-
-                        // আপনার কন্ডিশন অনুযায়ী রিডাইরেক্ট লজিক:
-                        if (!status || status === "registered") {
-                            // ইন্টারভিউ কমপ্লিট না হলে ইন্টারভিউ পেজে পাঠাবে
-                            window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-                        } 
-                        else if (status === "pending_review") {
-                            // ইন্টারভিউ শেষ কিন্তু অ্যাডমিন অ্যাপ্রুভ করেনি
-                            alert("Assessment complete. Please wait for Admin verification.");
-                            window.location.href = "staff.html"; 
-                        }
-                        else if (status === "verified") {
-                            // শুধুমাত্র ভেরিফাইড হলেই ড্যাশবোর্ড দেখতে পারবে
-                            window.location.href = "dashboard.html";
-                        }
-                        else {
-                            // ডিফল্ট স্ট্যাটাস পেজ
-                            window.location.href = "staff.html";
-                        }
-                    } else {
-                        alert("Incorrect Password!");
-                    }
-                } else {
-                    alert("User not found! Please register first.");
+                if (!status || status === "registered") {
+                    // 1. Jodi shudhu registration kore thake, tobe Assessment-e jabe
+                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                } 
+                else if (status === "exam_completed") {
+                    // 2. Jodi interview shesh hoye thake kintu mock test baki thake
+                    window.location.href = `mock-test.html?phone=${phone}`;
                 }
-            } catch (error) {
-                console.error(error);
-                alert("An error occurred. Check your internet connection.");
+                else if (status === "mock_completed" || status === "pending_review") {
+                    // 3. Jodi shob shesh hoye thake kintu admin verify koreni
+                    alert("Assessment complete. Waiting for Admin verification.");
+                    window.location.href = "staff.html"; 
+                }
+                else if (status === "verified") {
+                    // 4. Admin verify korlei kebol dashboard pabe
+                    window.location.href = "dashboard.html";
+                }
+                else {
+                    // Default redirect
+                    window.location.href = "staff.html";
+                }
+
+            } else {
+                alert("Incorrect Password!");
             }
+        } else {
+            alert("User not found! Please register first.");
         }
-    </script>
+    } catch (error) {
+        console.error(error);
+        alert("System Error! Check your internet.");
+    }
+}
+
 
 </body>
 </html>

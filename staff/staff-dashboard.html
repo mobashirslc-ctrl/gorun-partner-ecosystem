@@ -43,8 +43,11 @@
             <li class="nav-item" onclick="showSection('jobs', this)"><i class="fas fa-briefcase"></i> <span>Job Requests</span></li>
             <li class="nav-item" onclick="showSection('history', this)"><i class="fas fa-history"></i> <span>Job History</span></li>
             <li class="nav-item" onclick="showSection('earnings', this)"><i class="fas fa-wallet"></i> <span>Earnings</span></li>
-            <li class="nav-item" style="margin-top: 50px;" onclick="location.reload()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></li>
-        </ul>
+         <li class="nav-item" style="margin-top: 50px;" onclick="logoutStaff()">
+    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+</li>
+
+
     </div>
 
     <div class="main-content">
@@ -62,7 +65,7 @@
         <div id="dashboard-view">
             <div class="stats-grid">
                 <div class="wallet-card">
-                    <h4>Total Balance</h4>
+                    <h4>top-header Balance</h4>
                     <div class="balance" id="wallet-balance">৳ 0.00</div>
                     <button class="btn-withdraw"><i class="fas fa-money-bill-transfer"></i> Withdraw</button>
                 </div>
@@ -101,7 +104,7 @@
                 <div id="reader" style="display: none;"></div>
                 <div class="card-title"><i class="fas fa-play-circle" style="color: var(--gorun-green);"></i> Current Active Job</div>
                 <div id="active-job-card" style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px;">
-                    <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 13px; display: inline-block; margin-bottom: 10px; font-weight: 600;">
+                    <div style="background: #dcfce7; color: #15803d; padding: 5px 15px; border-radius: 20px; font-size: 1displaysplay: inline-block; margin-bottom: 10px; font-weight: 600;">
                         <i class="fas fa-map-marker-alt"></i> At: <span id="job-location">Searching...</span>
                     </div>
                     <h1 id="timer-display" style="font-size: 48px; font-weight: 800; margin: 10px 0; color: var(--dark-blue);">00:00:00</h1>
@@ -338,6 +341,20 @@ function trackOnboardingProgress(phone) {
             trackOnboardingProgress(currentStaffId); 
             
         };
+        // Logout Function
+function logoutStaff() {
+    // ১. কনফার্মেশন মেসেজ
+    if (confirm("Are you sure you want to logout?")) {
+        
+        // ২. সেশন বা লোকাল ডেটা ক্লিয়ার করা
+        localStorage.removeItem('currentStaffId'); // যদি আপনি স্টোরেজে আইডি রেখে থাকেন
+        sessionStorage.clear();
+
+        // ৩. রিডাইরেক্ট করা (রেজিস্ট্রেশন বা লগইন পেজে)
+        alert("Logging out successfully...");
+        window.location.href = 'register.html'; // এখানে আপনার লগইন বা হোম পেজের নাম দিন
+    }
+}
     
         // এই ফাংশনটি আপনার স্ক্রিপ্টের শেষে যোগ করুন
 function trackOnboardingProgress(staffId) {
@@ -349,6 +366,8 @@ function trackOnboardingProgress(staffId) {
         const statusDesc = document.getElementById('status-desc');
         const actionBtn = document.getElementById('status-action-btn');
         const iconBox = document.getElementById('status-icon-box');
+        
+
 
         // স্টেপগুলো রিসেট করা
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));

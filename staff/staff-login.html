@@ -32,46 +32,72 @@
     async function loginStaff() {
         const phone = document.getElementById('logPhone').value;
         const pass = document.getElementById('logPass').value;
+        const btn = document.querySelector('button');
 
         if(!phone || !pass) {
             alert("Please enter phone and password!");
             return;
         }
 
+        btn.disabled = true;
+        btn.innerText = "Authenticating...";
+
         try {
+            // gorun_staffs নোড থেকে ডাটা চেক করা হচ্ছে
             const snapshot = await db.ref('gorun_staffs/' + phone).get();
             
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 
+                // পাসওয়ার্ড ম্যাচিং
                 if (userData.password === pass) {
                     localStorage.setItem('currentStaffId', phone);
                     
-                    // রেজিস্ট্রেশন কোডে আপনি 'status' ব্যবহার করেছেন, তাই এখানেও 'status' চেক হবে
-                    const status = userData.status; 
+                    const status = userData.status || "registered";
                     const expertise = userData.expertise;
 
-                    if (status === "pending_review" || !status) {
-                        // যদি কেবল রেজিস্ট্রেশন করে থাকে, তবে ইন্টারভিউতে যাবে
+                    // --- প্রগ্রেস-ভিত্তিক রিডাইরেক্ট লজিক ---
+                    
+                    if (status === "registered") {
+                        // ১. শুধু রেজিস্ট্রেশন শেষ, ইন্টারভিউ বাকি
                         window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
                     } 
+                    else if (status === "exam_completed") {
+                        // ২. ইন্টারভিউ শেষ কিন্তু মক টেস্ট বাকি (যদি মক টেস্ট ফাইল থাকে)
+                        window.location.href = `mock-test.html?phone=${phone}`;
+                    }
+                    else if (status === "mock_completed" || status === "pending_review") {
+                        // ৩. সব শেষ কিন্তু অ্যাডমিন এখনো ভেরিফাই করেনি
+                        alert("Assessment complete! Waiting for Admin verification.");
+                        window.location.href = "pending.html"; // একটি ওয়েটিং পেজ
+                    }
                     else if (status === "verified") {
+                        // ৪. অ্যাডমিন ভেরিফাই করলেই কেবল ড্যাশবোর্ড
                         window.location.href = "dashboard.html";
                     }
                     else {
-                        window.location.href = "staff.html"; 
+                        window.location.href = "pending.html";
                     }
+
                 } else {
                     alert("Incorrect Password!");
+                    btn.disabled = false;
+                    btn.innerText = "Login";
                 }
             } else {
-                alert("User not found!");
+                alert("User not found! Please register first.");
+                btn.disabled = false;
+                btn.innerText = "Login";
             }
         } catch (error) {
-            alert("Error: " + error.message);
+            console.error(error);
+            alert("System Error: " + error.message);
+            btn.disabled = false;
+            btn.innerText = "Login";
         }
     }
 </script>
+
 
 </body>
 </html>

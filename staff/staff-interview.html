@@ -145,7 +145,7 @@
         }, 1000);
     }
 
-    function submitResult() {
+        function submitResult() {
         clearInterval(timerInterval);
         
         let score = 0;
@@ -153,14 +153,23 @@
             if(ans == currentQuestions[i].correct) score++;
         });
 
+        // ফোন নম্বরটি URL থেকে অথবা LocalStorage থেকে নেওয়া (নিরাপত্তার জন্য)
+        const staffPhone = phone || localStorage.getItem('currentStaffId');
+
+        if (!staffPhone) {
+            alert("Error: Staff identity not found. Please login again.");
+            window.location.href = "staff-login.html";
+            return;
+        }
+
         const updateData = {
             testScore: score,
-            onboarding_status: "pending_review", // স্ট্যাটাস আপডেট যেন আবার পরীক্ষা দিতে না পারে
+            onboarding_status: "pending_review", 
             examTime: new Date().toISOString()
         };
 
-        // Realtime Database এ আপডেট (আপনার gorun_staffs পাথ অনুযায়ী)
-        rdb.ref('gorun_staffs/' + phone).update(updateData).then(() => {
+        // rdb.ref-এ এখন staffPhone ব্যবহার করা হয়েছে যা আরও নিরাপদ
+        rdb.ref('gorun_staffs/' + staffPhone).update(updateData).then(() => {
             document.getElementById('examContainer').innerHTML = `
                 <div style="text-align: center; padding: 20px;">
                     <i class="fas fa-check-circle" style="font-size: 60px; color: var(--gorun-green);"></i>

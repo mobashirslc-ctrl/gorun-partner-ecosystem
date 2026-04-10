@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corporate Registration | GORUN</title>
+    <style>
+        body { background: #f1f5f9; font-family: sans-serif; display: flex; justify-content: center; padding: 40px; }
+        .reg-card { background: white; width: 100%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-reg { width: 100%; padding: 15px; background: #008f51; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-login-alt { display: block; text-align: center; margin-top: 15px; color: #008f51; text-decoration: none; font-size: 14px; font-weight: bold; border: 1px solid #008f51; padding: 10px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="reg-card">
+        <h2 style="text-align:center; color:#0f172a;">Corporate Partner</h2>
+        <p style="text-align:center; font-size:12px; color:#64748b;">Register your agency or office</p>
+        
+        <input type="text" id="cName" placeholder="Agency / Company Name">
+        <input type="tel" id="cPhone" placeholder="Mobile Number">
+        <select id="cType">
+            <option value="agency">Sub-Agency</option>
+            <option value="field_partner">Field Partner</option>
+            <option value="corporate_lead">Corporate Lead</option>
+        </select>
+        <input type="password" id="cPass" placeholder="Set Password">
+        
+        <button class="btn-reg" onclick="regCorp()">Register Now</button>
+        
+        <p style="text-align:center; margin-top:20px; font-size:12px;">Already a Partner?</p>
+        <a href="corporate-login.html" class="btn-login-alt">Login to Partner Portal</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="../config.js"></script>
+    <script>
+        function regCorp() {
+            const phone = document.getElementById('cPhone').value;
+            const pass = document.getElementById('cPass').value;
+            if(!phone || !pass) return alert("Fill all fields!");
+
+            firebase.database().ref('gorun_corporate/' + phone).set({
+                company: document.getElementById('cName').value,
+                phone: phone,
+                type: document.getElementById('cType').value,
+                password: pass,
+                status: "pending_review",
+                joinedAt: new Date().toISOString()
+            }).then(() => {
+                alert("Corporate Registration Complete! Admin will verify soon.");
+                window.location.href = "corporate-login.html";
+            });
+        }
+    </script>
+</body>
+</html>

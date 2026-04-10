@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Portal | GORUN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; }
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { text-align: center; width: 100%; max-width: 450px; padding: 20px; }
+        .logo { font-size: 35px; font-weight: 900; color: var(--gorun-green); margin-bottom: 5px; }
+        .subtitle { color: #64748b; margin-bottom: 40px; font-size: 14px; }
+        
+        .portal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 25px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-login { background: var(--gorun-green); color: white; }
+        .btn-login:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0, 143, 81, 0.3); }
+
+        .btn-reg { background: white; color: var(--dark-blue); border: 1px solid #e2e8f0; }
+        .btn-reg:hover { background: #f1f5f9; border-color: var(--gorun-green); }
+
+        .icon-box { background: rgba(255,255,255,0.2); width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .btn-reg .icon-box { background: #f1f5f9; color: var(--gorun-green); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">GORUN</div>
+        <div class="subtitle">Corporate & Expert Ecosystem</div>
+
+        <div class="portal-card">
+            <a href="../staff/staff-login.html" class="btn btn-login">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="icon-box"><i class="fas fa-key"></i></div>
+                    <span>Expert Login</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+
+            <a href="../staff/register.html" class="btn btn-reg">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="icon-box"><i class="fas fa-user-plus"></i></div>
+                    <span>Partner Registration</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 13px; color: #94a3b8;">
+            Merchant? <a href="../index.html" style="color: var(--gorun-green); text-decoration: none; font-weight: 600;">Go to Merchant Home</a>
+        </p>
+    </div>
+
+</body>
+</html>

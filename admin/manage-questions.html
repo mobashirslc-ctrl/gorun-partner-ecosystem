@@ -22,28 +22,28 @@
     <div class="form-group">
         <label>SELECT CATEGORY</label>
         <select id="cat">
-    <option value="student_counselor">Student Counselor</option>
-    <option value="visa_expert">Visa Documentation Expert</option>
-    <option value="compliance_expert">Compliance (Study Abroad)</option>
-    <option value="admission_specialist">University Admission Specialist</option>
-    <option value="language_trainer">IELTS / English Trainer</option>
-    <option value="software_dev">Software Developer</option>
-    <option value="data_entry">Data Entry Operator</option>
-    <option value="excel_expert">Excel & Data Analyst</option>
-    <option value="it_support">IT Support Technician</option>
-    <option value="graphics_designer">Graphics Designer</option>
-    <option value="sales_marketing">Sales & Marketing</option>
-    <option value="call_center">Call Centre Agent</option>
-    <option value="digital_marketer">Digital Marketing Expert</option>
-    <option value="social_media_manager">Social Media Manager</option>
-    <option value="bde_partner_manager">Business Development (B2B)</option>
-    <option value="office_admin">Office Administrator</option>
-    <option value="accounts_payroll">Accounts & Payroll</option>
-    <option value="hr_manager">HR Manager</option>
-    <option value="field_officer">Logistics / Field Officer</option>
-    <option value="content_writer">Content Writer / SOP Specialist</option>
-</select>
-
+            <option value="student_counselor">Student Counselor</option>
+            <option value="visa_expert">Visa Documentation Expert</option>
+            <option value="compliance_expert">Compliance (Study Abroad)</option>
+            <option value="admission_specialist">University Admission Specialist</option>
+            <option value="language_trainer">IELTS / English Trainer</option>
+            <option value="software_dev">Software Developer</option>
+            <option value="data_entry">Data Entry Operator</option>
+            <option value="excel_expert">Excel & Data Analyst</option>
+            <option value="it_support">IT Support Technician</option>
+            <option value="graphics_designer">Graphics Designer</option>
+            <option value="sales_marketing">Sales & Marketing</option>
+            <option value="call_center">Call Centre Agent</option>
+            <option value="digital_marketer">Digital Marketing Expert</option>
+            <option value="social_media_manager">Social Media Manager</option>
+            <option value="bde_partner_manager">Business Development (B2B)</option>
+            <option value="office_admin">Office Administrator</option>
+            <option value="accounts_payroll">Accounts & Payroll</option>
+            <option value="hr_manager">HR Manager</option>
+            <option value="field_officer">Logistics / Field Officer</option>
+            <option value="content_writer">Content Writer / SOP Specialist</option>
+        </select>
+    </div>
 
     <div class="form-group">
         <label>QUESTION TEXT</label>
@@ -63,39 +63,58 @@
         </select>
     </div>
 
-    <button class="btn-add" onclick="saveQuestion()">Add to Question Pool</button>
+    <button id="addBtn" class="btn-add" onclick="saveQuestion()">Add to Question Pool</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="../config.js"></script> <script>
-    const db = firebase.firestore();
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="../config.js"></script> 
+
+<script>
+    // Realtime Database রেফারেন্স
+    const rdb = firebase.database();
 
     function saveQuestion() {
-        const category = document.getElementById('qCategory').value;
-        const qData = {
-            question: document.getElementById('qText').value,
-            options: [
-                document.getElementById('opt1').value,
-                document.getElementById('opt2').value,
-                document.getElementById('opt3').value
-            ],
-            correct: parseInt(document.getElementById('correctIndex').value),
+        const category = document.getElementById('cat').value; // 'cat' আইডি ব্যবহার করা হয়েছে
+        const questionText = document.getElementById('qText').value;
+        const o1 = document.getElementById('opt1').value;
+        const o2 = document.getElementById('opt2').value;
+        const o3 = document.getElementById('opt3').value;
+        const correct = document.getElementById('correctIndex').value;
+        const btn = document.getElementById('addBtn');
+
+        if(!questionText || !o1 || !o2 || !o3) {
+            return alert("সবগুলো ঘর পূরণ করুন!");
+        }
+
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        // Realtime Database এ সেভ করার লজিক
+        // পাথ: questions / category_name / unique_id
+        const newPostRef = rdb.ref('questions/' + category).push();
+        
+        newPostRef.set({
+            question: questionText,
+            options: [o1, o2, o3],
+            correct: parseInt(correct),
             createdAt: new Date().toISOString()
-        };
-
-        if(!qData.question || !qData.options[0]) return alert("Please fill all fields!");
-
-        // Firestore এ সেভ হচ্ছে
-        db.collection("question_pool").doc(category).collection("questions").add(qData)
+        })
         .then(() => {
-            alert("Question Added Successfully!");
-            document.getElementById('qText').value = ""; // ফর্ম ক্লিয়ার করা
+            alert("Question Added Successfully to Realtime Database!");
+            // ফর্ম ক্লিয়ার করা
+            document.getElementById('qText').value = "";
             document.getElementById('opt1').value = "";
             document.getElementById('opt2').value = "";
             document.getElementById('opt3').value = "";
+            btn.disabled = false;
+            btn.innerText = "Add to Question Pool";
         })
-        .catch(err => alert("Error: " + err.message));
+        .catch(err => {
+            alert("Error: " + err.message);
+            btn.disabled = false;
+            btn.innerText = "Add to Question Pool";
+        });
     }
 </script>
 

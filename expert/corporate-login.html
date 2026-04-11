@@ -2,49 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Corporate Login | GORUN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Login | GORUN</title>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; color: #333; padding: 40px; border-radius: 20px; width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #008f51; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { background: #0f172a; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 15px; background: #008f51; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-login:disabled { background: #94a3b8; }
+        a { color: #008f51; text-decoration: none; font-size: 14px; display: block; margin-top: 15px; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2 style="color: #0f172a;">Partner Login</h2>
-        <input type="tel" id="cPhone" placeholder="Registered Phone">
-        <input type="password" id="cPass" placeholder="Password">
-        <button onclick="loginCorp()">Login</button>
-        <a href="corporate-reg.html" style="display:block; margin-top:15px; font-size:13px; color:#008f51; text-decoration:none;">New Partner? Register</a>
-    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="../config.js"></script>
-    <script>
-        async function loginCorp() {
-            const phone = document.getElementById('cPhone').value;
-            const pass = document.getElementById('cPass').value;
+<div class="login-card">
+    <h2>Partner Login</h2>
+    <input type="tel" id="loginPhone" placeholder="Official Phone Number">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button class="btn-login" id="loginBtn" onclick="handleLogin()">Login</button>
+    <a href="corporate-reg.html">New Partner? Register</a>
+</div>
 
-            try {
-                const snap = await firebase.database().ref('gorun_corporate/' + phone).get();
-                if(snap.exists()){
-                    const data = snap.val();
-                    if(data.password === pass){
-                        iif(data.status === "verified"){
-    // কোম্পানির আইডি বা ফোন নম্বর সেভ করে রাখা
-    localStorage.setItem("loggedCorpPhone", phone); 
-    localStorage.setItem("loggedCorpName", data.companyName || "Corporate Partner");
-    window.location.href = "corporate-dashboard.html";
-}
-                        } else {
-                            alert("Your application is still under review by Admin.");
-                        }
-                    } else { alert("Wrong Password!"); }
-                } else { alert("Account not found!"); }
-            } catch(e) { alert("Error: " + e.message); }
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// ১. ফায়ারবেস কনফিগারেশন (আপনার প্রোজেক্টের সাথে ঠিক আছে কি না দেখে নিন)
+const firebaseConfig = {
+    apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+    authDomain: "life-gps-2c6d1.firebaseapp.com",
+    projectId: "life-gps-2c6d1",
+    storageBucket: "life-gps-2c6d1.firebasestorage.app",
+    messagingSenderId: "739534835153",
+    appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ২. লগইন ফাংশন (handleLogin নাম দেওয়া হয়েছে আপনার এরর অনুযায়ী)
+async function handleLogin() {
+    const phone = document.getElementById('loginPhone').value;
+    const pass = document.getElementById('loginPass').value;
+    const btn = document.getElementById('loginBtn');
+
+    if(!phone || !pass) return alert("Please fill all fields!");
+
+    btn.disabled = true;
+    btn.innerText = "Authenticating...";
+
+    try {
+        const doc = await db.collection("corporates").doc(phone).get();
+        
+        if (doc.exists) {
+            const userData = doc.data();
+            // পাসওয়ার্ড চেক
+            if (userData.password === pass) {
+                // সেশন সেভ করা
+                localStorage.setItem("loggedCorpPhone", phone);
+                localStorage.setItem("loggedCorpName", userData.companyName);
+                
+                alert("Login Successful!");
+                window.location.href = "corporate-dashboard.html"; // ড্যাশবোর্ডে নিয়ে যাবে
+            } else {
+                alert("Wrong password!");
+            }
+        } else {
+            alert("No account found with this phone number!");
         }
-    </script>
+    } catch (err) {
+        console.error(err);
+        alert("Login failed: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Login";
+    }
+}
+</script>
 </body>
 </html>

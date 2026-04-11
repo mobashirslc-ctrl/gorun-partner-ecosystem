@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Test Session | GORUN</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -66,6 +67,19 @@
                 const joinBtn = document.getElementById('joinBtn');
                 joinBtn.style.display = 'inline-block';
                 joinBtn.href = data.mock_link;
+                try {
+        if (window.Notification && Notification.permission === "granted") {
+            new Notification("GORUN: Your Mock Test Link is Ready!");
+        }
+    } catch (err) {
+        console.log("Notification blocked by browser.");
+    }
+                joinBtn.onclick = function(e) {
+    if (data.mock_link) {
+        window.open(data.mock_link, '_blank');
+        return false; // ডিফল্ট href অ্যাকশন বন্ধ করে ম্যানুয়ালি ওপেন করা
+    }
+};
                 
                 document.getElementById('waitTime').innerText = "Expert is waiting for you.";
                 

@@ -49,27 +49,35 @@
                 const userData = snapshot.val();
                 
                 if (userData.password === pass) {
-                    localStorage.setItem('currentStaffId', phone);
-                    const status = userData.status || "registered";
-                    const expertise = userData.expertise;
+    localStorage.setItem('currentStaffId', phone);
+    const status = userData.status || "registered";
+    const expertise = userData.expertise;
+    const mockLink = userData.mock_link; // লিঙ্কটি চেক করার জন্য ভেরিয়েবল নিলাম
 
-                    // প্রগ্রেস অনুযায়ী রিডাইরেক্ট
-                    if (status === "registered") {
-                        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-                    } 
-                    else if (status === "exam_completed") {
-                        window.location.href = `mock-test.html?phone=${phone}`;
-                    }
-                    else if (status === "mock_completed" || status === "pending_review") {
-                        alert("Assessment complete. Waiting for Admin verification.");
-                        window.location.href = "pending.html"; 
-                    }
-                    else if (status === "verified") {
-                        window.location.href = "dashboard.html";
-                    }
-                    else {
-                        window.location.href = "pending.html";
-                    }
+    // ১. অগ্রাধিকার: যদি অ্যাডমিন লিঙ্ক পাঠিয়ে থাকে, তবে সরাসরি মক টেস্ট পেজে যাবে
+    if (mockLink || status === "mock_scheduled") {
+        window.location.href = `mock-test.html?phone=${phone}`;
+    } 
+    // ২. যদি একদম নতুন ইউজার হয় (অ্যাসেসমেন্ট বাকি)
+    else if (status === "registered" || status === "pending") {
+        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+    } 
+    // ৩. যদি পরীক্ষা শেষ কিন্তু লিঙ্ক এখনো দেয়নি (পেন্ডিং দেখাবে)
+    else if (status === "exam_completed") {
+        window.location.href = `pending.html?phone=${phone}`;
+    }
+    // ৪. যদি মক টেস্ট শেষ হয়ে রিভিউতে থাকে
+    else if (status === "mock_completed" || status === "pending_review") {
+        window.location.href = "pending.html"; 
+    }
+    // ৫. যদি সব ভেরিফিকেশন শেষ হয়ে যায়
+    else if (status === "verified") {
+    window.location.href = `dashboard.html?phone=${phone}`;
+}
+    else {
+        window.location.href = "pending.html";
+    }
+
                 } else {
                     alert("Incorrect Password!");
                     loginBtn.disabled = false;

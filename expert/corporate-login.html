@@ -1,5 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><title>Corporate Login</title></head>
-<body><h2>Corporate Login Coming Soon...</h2><a href="corporate-entry.html">Back</a></body>
+<head>
+    <meta charset="UTF-8">
+    <title>Corporate Login | GORUN</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; color: #333; padding: 40px; border-radius: 20px; width: 350px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #008f51; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2 style="color: #0f172a;">Partner Login</h2>
+        <input type="tel" id="cPhone" placeholder="Registered Phone">
+        <input type="password" id="cPass" placeholder="Password">
+        <button onclick="loginCorp()">Login</button>
+        <a href="corporate-reg.html" style="display:block; margin-top:15px; font-size:13px; color:#008f51; text-decoration:none;">New Partner? Register</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="../config.js"></script>
+    <script>
+        async function loginCorp() {
+            const phone = document.getElementById('cPhone').value;
+            const pass = document.getElementById('cPass').value;
+
+            try {
+                const snap = await firebase.database().ref('gorun_corporate/' + phone).get();
+                if(snap.exists()){
+                    const data = snap.val();
+                    if(data.password === pass){
+                        if(data.status === "verified"){
+                            window.location.href = "corporate-dashboard.html";
+                        } else {
+                            alert("Your application is still under review by Admin.");
+                        }
+                    } else { alert("Wrong Password!"); }
+                } else { alert("Account not found!"); }
+            } catch(e) { alert("Error: " + e.message); }
+        }
+    </script>
+</body>
 </html>

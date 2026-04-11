@@ -24,77 +24,65 @@
     </div>
 
         <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="../config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="../config.js"></script>
     <script>
     async function loginStaff() {
-        // বাটন এলিমেন্ট ধরছি যাতে ইউজার বুঝুক কাজ হচ্ছে
-        const loginBtn = document.querySelector('button');
-        const phone = document.getElementById('logPhone').value;
-        const pass = document.getElementById('logPass').value;
+    const loginBtn = document.querySelector('button');
+    const phone = document.getElementById('logPhone').value;
+    const pass = document.getElementById('logPass').value;
 
-        if(!phone || !pass) {
-            alert("Please enter phone and password!");
-            return;
-        }
+    if(!phone || !pass) {
+        alert("Please enter phone and password!");
+        return;
+    }
 
-        loginBtn.disabled = true;
-        loginBtn.innerText = "Checking...";
+    loginBtn.disabled = true;
+    loginBtn.innerText = "Checking...";
 
-        try {
-            // সরাসরি Firebase Realtime Database থেকে চেক
-            const snapshot = await firebase.database().ref('gorun_staffs/' + phone).get();
+    try {
+        const snapshot = await firebase.database().ref('gorun_staffs/' + phone).get();
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
             
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                
-                if (userData.password === pass) {
-    localStorage.setItem('currentStaffId', phone);
-    const status = userData.status || "registered";
-    const expertise = userData.expertise;
-    const mockLink = userData.mock_link; 
+            if (userData.password === pass) {
+                localStorage.setItem('currentStaffId', phone);
+                const status = userData.status || "registered";
+                const expertise = userData.expertise;
+                const mockLink = userData.mock_link;
 
-    // ১. অ্যাডমিন লিঙ্ক দিলে বা শিডিউল হলে মক টেস্টে যাবে
-    if (mockLink || status === "mock_scheduled") {
-        window.location.href = `mock-test.html?phone=${phone}`;
-    } 
-    // ২. নতুন ইউজার হলে পরীক্ষায় যাবে
-    else if (status === "registered" || status === "pending") {
-        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-    } 
-    // ৩. পরীক্ষা শেষ হলে সরাসরি মক টেস্টের ওয়েটিং রুমে যাবে (এটাই আপনার সমস্যার সমাধান)
-    else if (status === "exam_completed") {
-        window.location.href = `mock-test.html?phone=${phone}`; 
-    }
-    // ৪. মক ইন্টারভিউ পুরোপুরি শেষ হয়ে গেলে তখন পেন্ডিং দেখাবে
-    else if (status === "mock_completed" || status === "pending_review") {
-        window.location.href = "pending.html"; 
-    }
-    // ৫. ভেরিফাইড হলে ড্যাশবোর্ড
-    else if (status === "verified") {
-        window.location.href = `dashboard.html?phone=${phone}`;
-    }
-    else {
-        window.location.href = "pending.html";
-    }
-}
-                } else {
-                    alert("Incorrect Password!");
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "Login";
+                // সঠিক রিডাইরেক্ট লজিক
+                if (mockLink || status === "mock_scheduled" || status === "exam_completed") {
+                    window.location.href = `mock-test.html?phone=${phone}`;
+                } 
+                else if (status === "registered" || status === "pending") {
+                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                } 
+                else if (status === "verified") {
+                    window.location.href = `dashboard.html?phone=${phone}`;
+                }
+                else {
+                    window.location.href = "pending.html";
                 }
             } else {
-                alert("User not found! Please register first.");
+                alert("Incorrect Password!");
                 loginBtn.disabled = false;
                 loginBtn.innerText = "Login";
             }
-        } catch (error) {
-            console.error(error);
-            alert("Connection Error! Please check your config.js and internet.");
+        } else {
+            alert("User not found!");
             loginBtn.disabled = false;
             loginBtn.innerText = "Login";
         }
+    } catch (error) {
+        console.error("Login Error:", error);
+        alert("Connection Error! Check your internet.");
+        loginBtn.disabled = false;
+        loginBtn.innerText = "Login";
     }
+}
 </script>
 
 

@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Corporate Dashboard | GORUN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root { --gorun-green: #008f51; --dark-blue: #0f172a; --light-bg: #f8fafc; --sidebar-width: 260px; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--light-bg); display: flex; }
         .sidebar { width: var(--sidebar-width); background: var(--dark-blue); height: 100vh; color: white; padding: 30px 20px; position: fixed; }
-        .logo { font-size: 24px; font-weight: 800; color: var(--gorun-green); margin-bottom: 40px; }
+        .logo { margin-bottom: 40px; text-align: center; }
         .nav-menu { list-style: none; }
         .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #94a3b8; transition: 0.3s; }
         .nav-item.active { background: rgba(0, 143, 81, 0.1); color: var(--gorun-green); }
@@ -30,7 +31,9 @@
 <body>
 
 <div class="sidebar">
-    <div class="logo">GORUN Corporate</div>
+    <div class="logo">
+        <img src="logo.png" alt="GORUN" style="max-width: 140px; height: auto;">
+    </div>
     <ul class="nav-menu">
         <li class="nav-item active" onclick="switchSection('dashboard', this)"><i class="fas fa-home"></i> Overview</li>
         <li class="nav-item" onclick="switchSection('jobs', this)"><i class="fas fa-history"></i> Job History</li>
@@ -162,7 +165,7 @@
                 tableDiv.innerHTML = `<div id="active-staff-list">Scanning for active staff...</div>`;
                 loadActiveStaff();
             } else if (section === 'payments') {
-                tableDiv.innerHTML = `<table><thead><tr><th>Date</th><th>Expert</th><th>Amount</th><th>Status</th></tr></thead><tbody id="payment-list-body"></tbody></table>`;
+                tableDiv.innerHTML = `<table><thead><tr><th>Date</th><th>Expert</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="payment-list-body"></tbody></table>`;
                 loadPayments();
             } else if (section === 'qr') {
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=GORUN_OFFICE_${currentCorpPhone}`;
@@ -171,6 +174,7 @@
         }
     }
 
+    // --- ডাটা লোডিং ফাংশনস ---
     function loadJobHistory() {
         db.collection("jobs").where("clientId", "==", currentCorpPhone).orderBy("createdAt", "desc").get().then(snapshot => {
             const body = document.getElementById('job-list-body');
@@ -203,41 +207,116 @@
     }
 
     function loadPayments() {
-        db.collection("invoices").where("corporatePhone", "==", currentCorpPhone).get().then(snapshot => {
+        db.collection("invoices")
+          .where("corporatePhone", "==", currentCorpPhone)
+          .orderBy("createdAt", "desc")
+          .get()
+          .then(snapshot => {
             const body = document.getElementById('payment-list-body');
-            body.innerHTML = snapshot.empty ? "<tr><td colspan='4'>No payment history.</td></tr>" : "";
+            body.innerHTML = snapshot.empty ? "<tr><td colspan='5'>No payment history.</td></tr>" : "";
             snapshot.forEach(doc => {
                 const inv = doc.data();
-                body.innerHTML += `<tr>
-                    <td>${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : '...'}</td>
-                    <td>${inv.staffName}</td>
-                    <td>৳ ${inv.totalBill}</td>
-                    <td style="color:green">Paid</td>
-                </tr>`;
+                body.innerHTML += `
+                    <tr>
+                        <td>${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : '...'}</td>
+                        <td>${inv.staffName} <br><small style="color:#64748b">${inv.category}</small></td>
+                        <td>৳ ${inv.totalBill}</td>
+                        <td><span class="status-badge" style="background:#dcfce7; color:#15803d">Paid</span></td>
+                        <td>
+                            <button onclick="downloadInvoice('${doc.id}')" style="border:none; background:none; color:var(--gorun-green); cursor:pointer; font-size:16px;">
+                                <i class="fas fa-file-pdf"></i>
+                            </button>
+                        </td>
+                    </tr>`;
             });
         });
     }
+
+    // --- PDF এবং অন্যান্য ইউটিলিটি ---
+    function getBase64Image(imgUrl, callback) {
+        var img = new Image();
+        img.src = imgUrl;
+        img.setAttribute('crossOrigin', 'anonymous');
+        img.onload = function () {
+            var canvas = document.createElement("canvas");
+            canvas.width = this.width;
+            canvas.height = this.height;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(this, 0, 0);
+            callback(canvas.toDataURL("image/png"));
+        };
+        img.onerror = () => callback(null);
+    }
+
+    function downloadInvoice(invoiceId) {
+        db.collection("invoices").doc(invoiceId).get().then(doc => {
+            if (!doc.exists) return alert("Invoice not found!");
+            const inv = doc.data();
+            getBase64Image('logo.png', function(logoBase64) {
+                const { jsPDF } = window.jspdf;
+                const docPDF = new jsPDF();
+                if (logoBase64) docPDF.addImage(logoBase64, 'PNG', 15, 10, 40, 15);
+                
+                docPDF.setFontSize(20);
+                docPDF.setTextColor(0, 143, 81);
+                docPDF.text("INVOICE", 140, 20);
+                
+                docPDF.setFontSize(10);
+                docPDF.setTextColor(100);
+                docPDF.text(`Invoice ID: #GR-${invoiceId.substring(0,5).toUpperCase()}`, 140, 28);
+                docPDF.text(`Date: ${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : 'N/A'}`, 140, 33);
+
+                docPDF.setDrawColor(220);
+                docPDF.line(15, 45, 195, 45);
+
+                docPDF.setFontSize(12);
+                docPDF.setTextColor(0);
+                docPDF.setFont(undefined, 'bold');
+                docPDF.text("Bill To:", 15, 55);
+                docPDF.setFont(undefined, 'normal');
+                docPDF.text(currentCorpName, 15, 62);
+                docPDF.text(currentCorpPhone, 15, 69);
+
+                docPDF.text("Service Provider:", 120, 55);
+                docPDF.text("GORUN On-Demand Services", 120, 62);
+                docPDF.text("Dhaka, Bangladesh", 120, 69);
+
+                docPDF.setFillColor(248, 250, 252);
+                docPDF.rect(15, 80, 180, 10, 'F');
+                docPDF.setFont(undefined, 'bold');
+                docPDF.text("Description", 20, 86);
+                docPDF.text("Amount (BDT)", 160, 86);
+                
+                docPDF.setFont(undefined, 'normal');
+                docPDF.text(`Expert Service - ${inv.category} (${inv.staffName})`, 20, 98);
+                docPDF.text(`৳ ${inv.totalBill}`, 160, 98);
+
+                docPDF.line(15, 110, 195, 110);
+                docPDF.setFontSize(14);
+                docPDF.text("Total Amount:", 120, 120);
+                docPDF.setTextColor(0, 143, 81);
+                docPDF.text(`৳ ${inv.totalBill}`, 160, 120);
+
+                docPDF.save(`GORUN_Invoice_${invoiceId.substring(0,5)}.pdf`);
+            });
+        });
+    }
+
     function rechargeWallet() {
-    const amt = prompt("Enter amount to recharge (৳):");
-    if (!amt || isNaN(amt) || amt <= 0) return alert("Invalid amount!");
+        const amt = prompt("Enter amount (৳):");
+        if (!amt || isNaN(amt) || amt <= 0) return;
+        const trxId = prompt("Enter Transaction ID:");
+        if (!trxId) return alert("Transaction ID is required!");
 
-    const trxId = prompt("Enter your Bkash/Nagad Transaction ID:");
-    if (!trxId) return alert("Transaction ID is required for verification!");
-
-    // সরাসরি ওয়ালেট আপডেট না করে 'deposit_requests' এ ডাটা পাঠানো
-    db.collection("deposit_requests").add({
-        corporatePhone: currentCorpPhone,
-        corporateName: currentCorpName,
-        amount: parseInt(amt),
-        transactionId: trxId,
-        status: "pending",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert("Deposit request submitted! Wait for admin approval.");
-    }).catch(err => {
-        alert("Error: " + err.message);
-    });
-}
+        db.collection("deposit_requests").add({
+            corporatePhone: currentCorpPhone,
+            corporateName: currentCorpName,
+            amount: parseInt(amt),
+            transactionId: trxId,
+            status: "pending",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => alert("Deposit request submitted! Wait for admin approval."));
+    }
 
     function getLocation() {
         if (navigator.geolocation) {
@@ -250,19 +329,16 @@
 
     function submitJob() {
         const hiringType = document.querySelector('input[name="hiring-type"]:checked').value;
-        const date = document.getElementById('booking-date').value;
-        const rate = document.getElementById('hourly-rate').value;
         const lat = document.getElementById('lat').value;
-
         if(!lat) return alert("Please get office location first!");
         
         db.collection("jobs").add({
             clientId: currentCorpPhone,
             clientName: currentCorpName,
             hiringType: hiringType,
-            scheduledDate: hiringType === 'prebook' ? date : 'Instant',
+            scheduledDate: hiringType === 'prebook' ? document.getElementById('booking-date').value : 'Instant',
             category: document.getElementById('job-category').value,
-            hourlyRate: parseInt(rate),
+            hourlyRate: parseInt(document.getElementById('hourly-rate').value),
             geo: { lat: parseFloat(lat), lng: parseFloat(document.getElementById('lng').value) },
             status: "open",
             createdAt: firebase.firestore.FieldValue.serverTimestamp()

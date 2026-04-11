@@ -3,63 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <title>Corporate Registration | GORUN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f1f5f9; font-family: sans-serif; display: flex; justify-content: center; padding: 40px; }
-        .reg-card { background: white; width: 100%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-reg { width: 100%; padding: 15px; background: #008f51; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .btn-login-alt { display: block; text-align: center; margin-top: 15px; color: #008f51; text-decoration: none; font-size: 14px; font-weight: bold; border: 1px solid #008f51; padding: 10px; border-radius: 8px; }
+        :root { --gorun-green: #008f51; --light-bg: #f8fafc; }
+        body { background: var(--light-bg); font-family: 'Inter', sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .reg-card { background: white; width: 100%; max-width: 550px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        
+        /* Grid System */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        label { font-size: 13px; font-weight: 600; color: #475569; margin-top: 10px; display: block; }
+        
+        .btn-primary { width: 100%; padding: 15px; background: var(--gorun-green); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 25px; transition: 0.3s; }
+        .btn-primary:disabled { background: #94a3b8; }
+        
+        h3 { color: #0f172a; margin-bottom: 20px; text-align: center; }
+        @media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="reg-card">
-        <h2 style="text-align:center; color:#0f172a;">Corporate Partner</h2>
-        <p style="text-align:center; font-size:12px; color:#64748b;">Register your agency or office</p>
-        
-        <input type="text" id="cName" placeholder="Agency / Company Name">
-        <input type="tel" id="cPhone" placeholder="Mobile Number">
-        <select id="cType">
-            <option value="agency">Sub-Agency</option>
-            <option value="field_partner">Field Partner</option>
-            <option value="corporate_lead">Corporate Lead</option>
-        </select>
-        <input type="password" id="cPass" placeholder="Set Password">
-        
-        <button class="btn-reg" onclick="regCorp()">Register Now</button>
-        
-        <p style="text-align:center; margin-top:20px; font-size:12px;">Already a Partner?</p>
-        <a href="corporate-login.html" class="btn-login-alt">Login to Partner Portal</a>
-    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="../config.js"></script>
-    <script>
-    const db = firebase.database();
-
-    function regCorp() {
-        const phone = document.getElementById('cPhone').value;
-        const pass = document.getElementById('cPass').value;
+<div class="reg-card">
+    <h3><i class="fas fa-building" style="color: var(--gorun-green);"></i> Corporate Registration</h3>
+    <form id="regForm" onsubmit="handleRegistration(event)">
         
-        if(!phone || !pass) return alert("Fill all fields!");
+        <div class="grid-2">
+            <div>
+                <label>Company Name</label>
+                <input type="text" id="regCorpName" placeholder="e.g. Gorun Global" required>
+            </div>
+            <div>
+                <label>Company Type</label>
+                <select id="regCorpType">
+                    <option value="education_agency">Education Agency</option>
+                    <option value="consultancy">Consultancy Firm</option>
+                    <option value="it_firm">Software/IT Firm</option>
+                    <option value="private_ltd">Private Limited Company</option>
+                </select>
+            </div>
+        </div>
 
+        <div class="grid-2">
+            <div>
+                <label>Authorized Person</label>
+                <input type="text" id="regPerson" placeholder="Full Name" required>
+            </div>
+            <div>
+                <label>Designation</label>
+                <input type="text" id="regDesignation" placeholder="e.g. Managing Director">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <label>Contact Number (Official)</label>
+                <input type="tel" id="regPhone" placeholder="017XXXXXXXX" required>
+            </div>
+            <div>
+                <label>Official Email</label>
+                <input type="email" id="regEmail" placeholder="info@company.com">
+            </div>
+        </div>
+
+        <label>Full Office Address</label>
+        <textarea id="regAddress" rows="2" placeholder="Street, City, Postcode"></textarea>
+
+        <div class="grid-2">
+            <div>
+                <label>Trade License No.</label>
+                <input type="text" id="regTradeLicense" placeholder="TL-XXXXXX">
+            </div>
+            <div>
+                <label>Set Password</label>
+                <input type="password" id="regPass" placeholder="••••••••" required>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <label><i class="fas fa-paperclip"></i> Upload Documents (Logo, NID, License)</label>
+            <input type="file" id="regFiles" multiple style="border: none; padding: 5px;">
+            <small style="color: #64748b;">Max size: 5MB per file</small>
+        </div>
+
+        <button type="submit" class="btn-primary" id="regBtn">Submit Application</button>
+        <p style="text-align: center; font-size: 13px; margin-top: 15px;">
+            Already have a corporate account? <a href="corporate-login.html" style="color: var(--gorun-green); font-weight: bold;">Login here</a>
+        </p>
+    </form>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// ১. ফায়ারবেস কনফিগারেশন (আপনার প্রোজেক্টের সাথে মিলিয়ে নিন)
+const firebaseConfig = {
+    apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+    authDomain: "life-gps-2c6d1.firebaseapp.com",
+    projectId: "life-gps-2c6d1",
+    storageBucket: "life-gps-2c6d1.firebasestorage.app",
+    messagingSenderId: "739534835153",
+    appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+async function handleRegistration(e) {
+    e.preventDefault();
+    const btn = document.getElementById('regBtn');
+    const fileInput = document.getElementById('regFiles');
+    const phone = document.getElementById('regPhone').value;
+
+    // ক্লাউডিনারি সেটিংস
+    const cloudName = "dvp78103n"; // আপনার প্রোফাইল থেকে Cloud Name টা এখানে নিশ্চিত করে নিন (সাধারণত ছোট হাতের টেক্সট হয়)
+    const apiKey = "698924766176623";
+    const uploadPreset = "gorun_uploads"; // আপনার তৈরি করা Unsigned Preset এর নাম
+
+    btn.disabled = true;
+    btn.innerText = "Uploading Files...";
+
+    let uploadedUrls = [];
+
+    try {
+        // ১. ফাইল আপলোড প্রসেস (Cloudinary)
+        if (fileInput.files.length > 0) {
+            for (let file of fileInput.files) {
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("upload_preset", uploadPreset);
+                formData.append("api_key", apiKey);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const fileData = await res.json();
+                if (fileData.secure_url) {
+                    uploadedUrls.push(fileData.secure_url);
+                } else {
+                    console.error("Cloudinary Error:", fileData.error.message);
+                }
+            }
+        }
+
+        // ২. ডাটাবেস অবজেক্ট তৈরি
         const corpData = {
-            company: document.getElementById('cName').value,
+            companyName: document.getElementById('regCorpName').value,
+            type: document.getElementById('regCorpType').value,
+            contactPerson: document.getElementById('regPerson').value,
+            designation: document.getElementById('regDesignation').value,
             phone: phone,
-            type: document.getElementById('cType').value,
-            password: pass,
-            status: "pending_review", // অ্যাডমিন ভেরিফিকেশনের জন্য স্ট্যাটাস
-            role: "corporate",
-            joinedAt: new Date().toISOString()
+            email: document.getElementById('regEmail').value,
+            address: document.getElementById('regAddress').value,
+            tradeLicense: document.getElementById('regTradeLicense').value,
+            password: document.getElementById('regPass').value, 
+            documents: uploadedUrls, // ক্লাউডিনারি থেকে আসা লিঙ্কগুলো
+            status: "pending", 
+            walletBalance: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        db.ref('gorun_corporate/' + phone).set(corpData).then(() => {
-            alert("Registration Successful! Please wait for Admin Verification.");
-            // রেজিস্ট্রেশন শেষে তাকে একটি পেন্ডিং মেসেজ পেজে নিয়ে যান
-            window.location.href = "corporate-pending.html"; 
-        }).catch(e => alert(e.message));
-    }
-</script>
+        // ৩. ফায়ারবেসে ডাটা পাঠানো
+        btn.innerText = "Saving Account...";
+        await db.collection("corporates").doc(phone).set(corpData);
 
+        alert("Registration Successful! Documents uploaded to Cloudinary.");
+        window.location.href = "corporate-login.html";
+
+    } catch (err) {
+        console.error("Critical Error:", err);
+        alert("Registration failed: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit Application";
+    }
+}
+</script>
 </body>
 </html>

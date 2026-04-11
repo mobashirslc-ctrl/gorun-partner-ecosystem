@@ -32,8 +32,12 @@
                 if(snap.exists()){
                     const data = snap.val();
                     if(data.password === pass){
-                        if(data.status === "verified"){
-                            window.location.href = "corporate-dashboard.html";
+                        iif(data.status === "verified"){
+    // কোম্পানির আইডি বা ফোন নম্বর সেভ করে রাখা
+    localStorage.setItem("loggedCorpPhone", phone); 
+    localStorage.setItem("loggedCorpName", data.companyName || "Corporate Partner");
+    window.location.href = "corporate-dashboard.html";
+}
                         } else {
                             alert("Your application is still under review by Admin.");
                         }

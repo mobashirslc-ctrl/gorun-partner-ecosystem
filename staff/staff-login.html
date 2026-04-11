@@ -52,32 +52,32 @@
     localStorage.setItem('currentStaffId', phone);
     const status = userData.status || "registered";
     const expertise = userData.expertise;
-    const mockLink = userData.mock_link; // লিঙ্কটি চেক করার জন্য ভেরিয়েবল নিলাম
+    const mockLink = userData.mock_link; 
 
-    // ১. অগ্রাধিকার: যদি অ্যাডমিন লিঙ্ক পাঠিয়ে থাকে, তবে সরাসরি মক টেস্ট পেজে যাবে
+    // ১. অ্যাডমিন লিঙ্ক দিলে বা শিডিউল হলে মক টেস্টে যাবে
     if (mockLink || status === "mock_scheduled") {
         window.location.href = `mock-test.html?phone=${phone}`;
     } 
-    // ২. যদি একদম নতুন ইউজার হয় (অ্যাসেসমেন্ট বাকি)
+    // ২. নতুন ইউজার হলে পরীক্ষায় যাবে
     else if (status === "registered" || status === "pending") {
         window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
     } 
-    // ৩. যদি পরীক্ষা শেষ কিন্তু লিঙ্ক এখনো দেয়নি (পেন্ডিং দেখাবে)
+    // ৩. পরীক্ষা শেষ হলে সরাসরি মক টেস্টের ওয়েটিং রুমে যাবে (এটাই আপনার সমস্যার সমাধান)
     else if (status === "exam_completed") {
-        window.location.href = `pending.html?phone=${phone}`;
+        window.location.href = `mock-test.html?phone=${phone}`; 
     }
-    // ৪. যদি মক টেস্ট শেষ হয়ে রিভিউতে থাকে
+    // ৪. মক ইন্টারভিউ পুরোপুরি শেষ হয়ে গেলে তখন পেন্ডিং দেখাবে
     else if (status === "mock_completed" || status === "pending_review") {
         window.location.href = "pending.html"; 
     }
-    // ৫. যদি সব ভেরিফিকেশন শেষ হয়ে যায়
+    // ৫. ভেরিফাইড হলে ড্যাশবোর্ড
     else if (status === "verified") {
-    window.location.href = `dashboard.html?phone=${phone}`;
-}
+        window.location.href = `dashboard.html?phone=${phone}`;
+    }
     else {
         window.location.href = "pending.html";
     }
-
+}
                 } else {
                     alert("Incorrect Password!");
                     loginBtn.disabled = false;

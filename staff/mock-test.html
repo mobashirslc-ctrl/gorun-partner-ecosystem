@@ -47,6 +47,13 @@
         // Realtime Listener: অ্যাডমিন লিঙ্ক বসানো মাত্রই এটি কাজ করবে
         rdb.ref('gorun_staffs/' + phone).on('value', (snapshot) => {
             const data = snapshot.val();
+            if (!data) return; 
+
+    // যদি স্ট্যাটাস এখনো পরীক্ষা দেওয়ার পর্যায়ে থাকে, তবে তাকে ধাক্কা দিয়ে পরীক্ষায় পাঠিয়ে দিবে
+    if (data.status === "registered" || data.status === "pending") {
+        window.location.href = "staff-interview.html?phone=" + phone + "&expertise=" + data.expertise;
+        return;
+    }
             
             if (data && data.mock_link) {
                 // লিঙ্ক পাওয়া গেলে

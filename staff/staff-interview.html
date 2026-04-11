@@ -152,34 +152,36 @@
     }
 
     function submitResult() {
-        clearInterval(timerInterval);
+    clearInterval(timerInterval);
+    
+    let score = 0;
+    userAnswers.forEach((ans, i) => {
+        if(ans == currentQuestions[i].correct) score++;
+    });
+
+    const updateData = {
+        testScore: score,
+        status: "exam_completed", 
+        examTime: new Date().toISOString()
+    };
+
+    // ডাটাবেস আপডেট হওয়ার পর সরাসরি mock-test.html এ পাঠাবে
+    rdb.ref('gorun_staffs/' + phone).update(updateData).then(() => {
+        document.getElementById('examContainer').innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <i class="fas fa-check-circle" style="font-size: 60px; color: var(--gorun-green);"></i>
+                <h2 style="margin-top: 20px;">Assessment Completed!</h2>
+                <p style="color: #64748b; margin: 15px 0;">Your Score: ${score} / ${currentQuestions.length}</p>
+                <p>Moving to Next Step: Mock Test Preparation...</p>
+            </div>
+        `;
         
-        let score = 0;
-        userAnswers.forEach((ans, i) => {
-            if(ans == currentQuestions[i].correct) score++;
-        });
-
-        const updateData = {
-            testScore: score,
-            status: "exam_completed", // আপনার লগইন লজিক অনুযায়ী এটি 'exam_completed' হওয়া উচিত
-            examTime: new Date().toISOString()
-        };
-
-        rdb.ref('gorun_staffs/' + phone).update(updateData).then(() => {
-            document.getElementById('examContainer').innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-check-circle" style="font-size: 60px; color: var(--gorun-green);"></i>
-                    <h2 style="margin-top: 20px;">Assessment Completed!</h2>
-                    <p style="color: #64748b; margin: 15px 0;">You scored ${score} out of ${currentQuestions.length}</p>
-                    <p>Wait a moment...</p>
-                </div>
-            `;
-            setTimeout(() => { 
-                // রিডাইরেক্ট হবে পেন্ডিং পেজে
-                window.location.href = "pending.html"; 
-            }, 3000);
-        });
-    }
+        setTimeout(() => { 
+            // এখানে পরিবর্তন: সরাসরি mock-test.html এ পাঠিয়ে দিচ্ছি
+            window.location.href = "mock-test.html?phone=" + phone; 
+        }, 2500);
+    });
+}
 
     window.onload = startAssessment;
 </script>

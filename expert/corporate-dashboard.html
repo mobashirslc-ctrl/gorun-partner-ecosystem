@@ -42,10 +42,11 @@
     <div class="sidebar">
     <div class="logo">GORUN Corporate</div>
     <ul class="nav-menu">
-        <li class="nav-item active"><i class="fas fa-plus-circle"></i> Place Job</li>
-        <li class="nav-item"><i class="fas fa-users"></i> Active Staff</li>
-        <li class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Payments</li>
-        <li class="nav-item" onclick="logout()" style="margin-top: 50px; color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Logout</li>
+        <li class="nav-item active" onclick="switchSection('dashboard', this)"><i class="fas fa-home"></i> Overview</li>
+<li class="nav-item" onclick="switchSection('jobs', this)"><i class="fas fa-plus-circle"></i> Place Job</li>
+<li class="nav-item" onclick="switchSection('staff', this)"><i class="fas fa-users"></i> Active Staff</li>
+<li class="nav-item" onclick="switchSection('qr', this)"><i class="fas fa-qrcode"></i> Office QR</li>
+<li class="nav-item" onclick="switchSection('payments', this)"><i class="fas fa-file-invoice-dollar"></i> Payments</li>>
     </ul>
 </div>
 
@@ -120,6 +121,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
     const currentCorpPhone = localStorage.getItem("loggedCorpPhone");
@@ -145,6 +147,88 @@
 
     const currentClientId = currentCorpPhone;
     let minRate = 200;
+
+    // --- ১. সেকশন পরিবর্তন করার লজিক (Sidebar Logic) ---
+    function switchSection(section, element) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        element.classList.add('active');
+
+        const dashboard = document.getElementById('dashboard-main-view'); 
+        const tableContainer = document.getElementById('table-container'); 
+        const tableTitle = document.getElementById('table-title');
+        const tableDiv = document.getElementById('table-content');
+
+        if (section === 'dashboard') {
+            dashboard.style.display = 'block';
+            tableContainer.style.display = 'none';
+        } 
+        else if (section === 'qr') {
+            dashboard.style.display = 'none';
+            tableContainer.style.display = 'block';
+            tableTitle.innerText = "Official Attendance QR";
+            
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=GORUN_CHECKIN_${currentCorpPhone}`;
+            tableDiv.innerHTML = `
+                <div style="text-align:center; padding:40px; background:white; border-radius:20px;">
+                    <img src="${qrUrl}" alt="Office QR" style="border:10px solid #f1f5f9; border-radius:15px;">
+                    <h2 style="margin-top:20px; color:#0f172a;">Scan to Check-in</h2>
+                    <p style="color:#64748b;">Print this QR and place it at your office entrance.</p>
+                    <button onclick="window.print()" style="padding: 10px 20px; background:#008f51; color:white; border:none; border-radius:8px; cursor:pointer; margin-top:20px;">Download/Print QR</button>
+                </div>`;
+        }
+        else {
+            dashboard.style.display = 'none';
+            tableContainer.style.display = 'block';
+            tableTitle.innerText = section.charAt(0).toUpperCase() + section.slice(1);
+            
+            if (section === 'jobs') {
+                tableDiv.innerHTML = `<tbody id="jobs-table-body"><tr><td>Loading Jobs...</td></tr></tbody>`;
+                // loadJobsTable() ফাংশনটি নিচে আছে
+            } 
+            else if (section === 'staff') {
+                 tableDiv.innerHTML = `<div id="active-jobs-container" style="padding:20px;">Loading Active Staff...</div>`;
+            }
+            else {
+                tableDiv.innerHTML = `<p style="padding:20px; color:#64748b;">No ${section} records found.</p>`;
+            }
+        }
+    }
+
+    // --- ২. ওয়ালেট রিচার্জ লজিক ---
+    function rechargeWallet() {
+        const amount = prompt("Enter amount to recharge (৳):");
+        if (amount && !isNaN(amount)) {
+            db.collection("corporates").doc(currentCorpPhone).update({
+                walletBalance: firebase.firestore.FieldValue.increment(parseInt(amount))
+            }).then(() => {
+                alert("Recharge successful! ৳" + amount + " added to your wallet.");
+            });
+        }
+    }
+
+    // --- ৩. ইনভয়েস ডাউনলোড লজিক (PDF) ---
+    function downloadInvoice(inv) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text(`GORUN INVOICE`, 20, 20);
+        doc.text(`Company: ${currentCorpName}`, 20, 30);
+        doc.text(`Expert: ${inv.staffName}`, 20, 40);
+        doc.text(`Total Bill: BDT ${inv.totalBill}`, 20, 50);
+        doc.text(`Date: ${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : 'N/A'}`, 20, 60);
+        doc.save(`Invoice_${inv.staffName}.pdf`);
+    }
+
+    // --- ৪. জব কমপ্লিট এবং রেটিং লজিক ---
+    function completeJobAndRate(jobId) {
+        const rating = prompt("Rate this Expert (1 to 5 stars):");
+        if (rating >= 1 && rating <= 5) {
+            db.collection("jobs").doc(jobId).update({
+                status: "completed",
+                rating: parseInt(rating),
+                completedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("Job marked as completed. Thank you!"));
+        }
+    }
 
     // Fetch Global Config
     db.collection("settings").doc("global_config").onSnapshot(doc => {
@@ -174,61 +258,46 @@
     }
 
     function submitJob() {
-    const rate = document.getElementById('hourly-rate').value;
-    const lat = document.getElementById('lat').value;
-    const lng = document.getElementById('lng').value;
-    const btn = document.querySelector('.btn-primary'); // বাটনটি ধরুন
+        const rate = document.getElementById('hourly-rate').value;
+        const lat = document.getElementById('lat').value;
+        const lng = document.getElementById('lng').value;
+        const btn = document.querySelector('.btn-primary');
 
-    // ১. ভ্যালিডেশন চেক
-    if(rate < minRate) return alert(`Minimum rate is ৳${minRate}`);
-    if(!lat || !lng) return alert("Please set your Office Location first!");
+        if(rate < minRate) return alert(`Minimum rate is ৳${minRate}`);
+        if(!lat || !lng) return alert("Please set your Office Location first!");
 
-    const tasks = Array.from(document.querySelectorAll('.task-item'))
-                       .map(i => ({ title: i.value, completed: false }))
-                       .filter(t => t.title !== "");
+        const tasks = Array.from(document.querySelectorAll('.task-item'))
+                           .map(i => ({ title: i.value, completed: false }))
+                           .filter(t => t.title !== "");
 
-    if(tasks.length === 0) return alert("Please add at least one task!");
+        if(tasks.length === 0) return alert("Please add at least one task!");
 
-    // ২. কনফার্মেশন
-    if(!confirm(`Are you sure to publish this job at ৳${rate}/hour?`)) return;
+        if(!confirm(`Are you sure to publish this job at ৳${rate}/hour?`)) return;
 
-    // ৩. বাটন ডিজেবল (যাতে বারবার ক্লিক না হয়)
-    btn.disabled = true;
-    btn.innerText = "Publishing...";
+        btn.disabled = true;
+        btn.innerText = "Publishing...";
 
-    db.collection("jobs").add({
-        clientId: currentClientId,
-        clientName: currentCorpName,
-        category: document.getElementById('job-category').value,
-        hourlyRate: parseInt(rate),
-        geo: { 
-            lat: parseFloat(lat), // স্ট্রিং থেকে নাম্বারে কনভার্ট করা ভালো
-            lng: parseFloat(lng) 
-        },
-        tasks: tasks,
-        status: "open",
-        staffId: null,      // ডিফল্ট ভ্যালু রাখা ভালো
-        staffName: null,    // ডিফল্ট ভ্যালু রাখা ভালো
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-        alert("Job Published Successfully!");
-        
-        // ফর্ম রিসেট
-        document.getElementById('hourly-rate').value = "";
-        document.getElementById('lat').value = "";
-        document.getElementById('lng').value = "";
-        document.querySelectorAll('.task-item').forEach((el, index) => {
-            index !== 0 ? el.remove() : el.value = "";
+        db.collection("jobs").add({
+            clientId: currentClientId,
+            clientName: currentCorpName,
+            category: document.getElementById('job-category').value,
+            hourlyRate: parseInt(rate),
+            geo: { lat: parseFloat(lat), lng: parseFloat(lng) },
+            tasks: tasks,
+            status: "open",
+            staffId: null,
+            staffName: null,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            alert("Job Published Successfully!");
+            location.reload();
+        }).catch(err => {
+            alert("Error: " + err.message);
+            btn.disabled = false;
         });
-    }).catch(err => {
-        alert("Error publishing job: " + err.message);
-    }).finally(() => {
-        // বাটন আবার ঠিক করা
-        btn.disabled = false;
-        btn.innerText = "Publish Job Order";
-    });
-}
-    // Live Monitoring Logic (With Progress Bar)
+    }
+
+    // Live Monitoring Logic (Updated with Map Verification)
     db.collection("jobs")
       .where("clientId", "==", currentClientId)
       .where("status", "in", ["ongoing", "pending_approval"])
@@ -239,77 +308,59 @@
         snapshot.forEach(doc => {
             const job = doc.data();
             const doneTasks = job.tasks.filter(t => t.completed).length;
-            const totalTasks = job.tasks.length;
-            const progress = (doneTasks / totalTasks) * 100;
+            const progress = (doneTasks / job.tasks.length) * 100;
+            
+            // ম্যাপ লিঙ্ক জেনারেশন
+            const mapLink = `https://www.google.com/maps?q=${job.staffLocation?.lat || 0},${job.staffLocation?.lng || 0}`;
 
             const div = document.createElement('div');
             div.className = "card";
-            div.style = "border: 1px solid #e2e8f0; box-shadow: none; margin-bottom: 15px;";
+            div.style = "border: 1px solid #e2e8f0; margin-bottom: 15px; padding: 15px; border-radius: 12px;";
             
-            let actionBtn = "";
-            if(job.status === "pending_approval") {
-                actionBtn = `<button class="btn-approve" onclick="approveStaff('${doc.id}')">Approve Check-in</button>`;
-            }
-
             div.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <span class="status-badge status-ongoing">${job.status.replace('_', ' ').toUpperCase()}</span>
-                        <h4 style="margin-top:10px;">Expert: ${job.staffName || 'Assigning...'}</h4>
-                        <small>Category: ${job.category}</small>
+                        <span class="status-badge" style="background:#dcfce7; color:#15803d; padding:4px 8px; border-radius:5px; font-size:10px;">${job.status.toUpperCase()}</span>
+                        <h4 style="margin:10px 0 5px 0;">Expert: ${job.staffName || 'Assigning...'}</h4>
+                        <button onclick="window.open('${mapLink}')" style="background:none; border:none; color:#008f51; cursor:pointer; font-size:12px; padding:0;"><i class="fas fa-map-marker-alt"></i> Verify Location</button>
                     </div>
-                    <div>${actionBtn}</div>
+                    <div>
+                        <button onclick="completeJobAndRate('${doc.id}')" style="background:#008f51; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">Finish Job</button>
+                    </div>
                 </div>
                 <div style="margin-top: 15px;">
-                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                        <span>Task Progress</span>
-                        <span>${doneTasks}/${totalTasks} Completed</span>
+                    <div style="display:flex; justify-content:space-between; font-size:12px;">
+                        <span>Progress</span>
+                        <span>${doneTasks}/${job.tasks.length} Done</span>
                     </div>
-                    <div style="width:100%; background:#f1f5f9; height:8px; border-radius:10px; overflow:hidden;">
-                        <div style="width:${progress}%; background:var(--gorun-green); height:100%; transition:0.5s;"></div>
+                    <div style="width:100%; background:#f1f5f9; height:6px; border-radius:10px; margin-top:5px; overflow:hidden;">
+                        <div style="width:${progress}%; background:#008f51; height:100%;"></div>
                     </div>
-                </div>
-            `;
+                </div>`;
             container.appendChild(div);
         });
     });
 
-    function approveStaff(jobId) {
-        db.collection("jobs").doc(jobId).update({
-            status: "ongoing",
-            startTime: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    }
-
-    // Transaction History Update
+    // Transaction History Update (with PDF Download)
     db.collection("invoices")
-  .where("corporatePhone", "==", currentClientId)
-  .onSnapshot(snapshot => {
-    const list = document.getElementById('transaction-history');
-    list.innerHTML = "";
-    let totalDue = 0;
-
-    // ডাটাকে জাভাস্ক্রিপ্ট দিয়ে সর্ট করা (ইন্ডেক্স এরর এড়াতে)
-    const sortedDocs = snapshot.docs.sort((a, b) => b.data().createdAt - a.data().createdAt);
-
-    sortedDocs.forEach(doc => {
-        const inv = doc.data();
-            if(inv.status === "unpaid") totalDue += inv.totalBill;
-
-            list.innerHTML += `
-                <tr style="border-bottom: 1px solid #f1f5f9; font-size: 14px;">
-                    <td style="padding: 12px;">${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : 'Processing...'}</td>
-                    <td style="padding: 12px;">${inv.staffName}</td>
-                    <td style="padding: 12px; font-weight:700;">৳ ${inv.totalBill}</td>
-                    <td style="padding: 12px;">
-                        <span class="status-badge" style="background: ${inv.status === 'paid' ? '#dcfce7' : '#fee2e2'}; color: ${inv.status === 'paid' ? '#15803d' : '#991b1b'};">
-                            ${inv.status.toUpperCase()}
-                        </span>
-                    </td>
-                </tr>
+      .where("corporatePhone", "==", currentClientId)
+      .onSnapshot(snapshot => {
+        const list = document.getElementById('transaction-history');
+        if(!list) return;
+        list.innerHTML = "";
+        
+        snapshot.forEach(doc => {
+            const inv = doc.data();
+            const row = document.createElement('tr');
+            row.style = "border-bottom: 1px solid #f1f5f9; font-size: 14px;";
+            row.innerHTML = `
+                <td style="padding: 12px;">${inv.createdAt ? inv.createdAt.toDate().toLocaleDateString() : '...'}</td>
+                <td style="padding: 12px;">${inv.staffName}</td>
+                <td style="padding: 12px;">৳ ${inv.totalBill}</td>
+                <td style="padding: 12px;"><button onclick='downloadInvoice(${JSON.stringify(inv)})' style="border:none; background:none; color:#008f51; cursor:pointer;"><i class="fas fa-download"></i> PDF</button></td>
             `;
+            list.appendChild(row);
         });
-        document.getElementById('wallet-balance').innerText = `Total Due: ৳ ${totalDue}`;
     });
 
     function logout() {

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Dashboard | GORUN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gorun-green: #008f51; --dark-blue: #0f172a; --light-bg: #f8fafc; --sidebar-width: 260px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--light-bg); display: flex; }
+        
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-width); background: var(--dark-blue); height: 100vh; color: white; padding: 30px 20px; position: fixed; }
+        .logo { font-size: 24px; font-weight: 800; color: var(--gorun-green); margin-bottom: 40px; }
+        .nav-menu { list-style: none; }
+        .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 12px; color: #94a3b8; transition: 0.3s; }
+        .nav-item.active { background: rgba(0, 143, 81, 0.1); color: var(--gorun-green); }
+
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        input, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; margin-top: 5px; }
+        label { font-size: 14px; font-weight: 600; color: #475569; }
+        
+        .btn-primary { background: var(--gorun-green); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 20px; }
+        .btn-approve { background: #3b82f6; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+        
+        /* Live Job Status */
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .status-ongoing { background: #dcfce7; color: #15803d; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">GORUN Corporate</div>
+        <ul class="nav-menu">
+            <li class="nav-item active"><i class="fas fa-plus-circle"></i> Place Job</li>
+            <li class="nav-item"><i class="fas fa-users"></i> Active Staff</li>
+            <li class="nav-item"><i class="fas fa-file-invoice-dollar"></i> Payments</li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h2>Welcome, <span id="company-name">Corporate Partner</span></h2>
+            <div id="wallet-balance" style="font-weight: 700;">Balance: ৳ 0.00</div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-briefcase"></i> Post a New Job Request</h3>
+            <div class="grid-2" style="margin-top: 20px;">
+                <div>
+                    <label>Required Expert Expertise</label>
+                    <select id="job-category">
+                        <option value="counselor">Study Abroad Counselor</option>
+                        <option value="it_expert">IT & Software Expert</option>
+                        <option value="compliance">Compliance Officer</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Hourly Payment (৳)</label>
+                    <input type="number" id="hourly-rate" placeholder="e.g. 250">
+                    <small id="rate-msg" style="color: #64748b;">Min rate allowed: ৳<span id="min-val">...</span></small>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label>Office Geo-Location (Latitude & Longitude)</label>
+                <div class="grid-2">
+                    <input type="text" id="lat" placeholder="Latitude">
+                    <input type="text" id="lng" placeholder="Longitude">
+                </div>
+                <button onclick="getLocation()" style="font-size: 12px; background: none; border: none; color: var(--gorun-green); cursor: pointer; margin-top: 5px;">
+                    <i class="fas fa-location-dot"></i> Get Current Office Location
+                </button>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <label>Core Tasks (Checklist for Staff)</label>
+                <div id="task-list">
+                    <input type="text" class="task-item" placeholder="Task 1: e.g. Student Interview" style="margin-bottom: 10px;">
+                </div>
+                <button onclick="addTask()" style="background: #f1f5f9; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer;">+ Add More Task</button>
+            </div>
+
+            <button class="btn-primary" onclick="submitJob()">Publish Job Order</button>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-satellite"></i> Live Monitoring & Approvals</h3>
+            <div id="active-jobs-container" style="margin-top: 20px;">
+                <p style="color: #94a3b8;">No active staff at the moment.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ4On6mrMYp743OPavpxlsYUDrU-B7ozM",
+            authDomain: "life-gps-2c6d1.firebaseapp.com",
+            projectId: "life-gps-2c6d1",
+            storageBucket: "life-gps-2c6d1.firebasestorage.app",
+            messagingSenderId: "739534835153",
+            appId: "1:739534835153:web:77e6b1f6650fba5d7624f0"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const currentClientId = "corp_agency_01"; // Logic: To be pulled from login
+        let minRate = 200;
+
+        // Fetch Global Config
+        db.collection("settings").doc("global_config").onSnapshot(doc => {
+            if(doc.exists) {
+                minRate = doc.data().min_hourly_rate || 200;
+                document.getElementById('min-val').innerText = minRate;
+            }
+        });
+
+        function addTask() {
+            const input = document.createElement('input');
+            input.className = 'task-item';
+            input.placeholder = "Next Task...";
+            input.style.marginBottom = "10px";
+            document.getElementById('task-list').appendChild(input);
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('lat').value = pos.coords.latitude;
+                    document.getElementById('lng').value = pos.coords.longitude;
+                });
+            }
+        }
+
+        function submitJob() {
+            const rate = document.getElementById('hourly-rate').value;
+            if(rate < minRate) return alert(`Minimum rate is ৳${minRate}`);
+
+            const tasks = Array.from(document.querySelectorAll('.task-item'))
+                               .map(i => ({ title: i.value, completed: false }))
+                               .filter(t => t.title !== "");
+
+            db.collection("jobs").add({
+                clientId: currentClientId,
+                category: document.getElementById('job-category').value,
+                hourlyRate: parseInt(rate),
+                geo: { lat: document.getElementById('lat').value, lng: document.getElementById('lng').value },
+                tasks: tasks,
+                status: "open",
+                staffApprovalPending: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("Job Published Successfully!"));
+        }
+
+        // Live Monitoring Logic
+        db.collection("jobs")
+          .where("clientId", "==", currentClientId)
+          .where("status", "in", ["ongoing", "pending_approval"])
+          .onSnapshot(snapshot => {
+            const container = document.getElementById('active-jobs-container');
+            container.innerHTML = "";
+            
+            snapshot.forEach(doc => {
+                const job = doc.data();
+                const div = document.createElement('div');
+                div.className = "card";
+                div.style = "border: 1px solid #e2e8f0; box-shadow: none;";
+                
+                let actionBtn = "";
+                if(job.status === "pending_approval") {
+                    actionBtn = `<button class="btn-approve" onclick="approveStaff('${doc.id}')">Approve Check-in</button>`;
+                }
+
+                div.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <div>
+                            <strong>Expert: ${job.staffName || 'Assigning...'}</strong><br>
+                            <small>Tasks: ${job.tasks.filter(t=>t.completed).length}/${job.tasks.length} Done</small>
+                        </div>
+                        <div>${actionBtn}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+
+        function approveStaff(jobId) {
+            db.collection("jobs").doc(jobId).update({
+                status: "ongoing",
+                startTime: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    </script>
+</body>
+</html>

@@ -48,24 +48,27 @@
             const userData = snapshot.val();
             
             if (userData.password === pass) {
-                localStorage.setItem('currentStaffId', phone);
-                const status = userData.status || "registered";
-                const expertise = userData.expertise;
-                const mockLink = userData.mock_link;
+    localStorage.setItem('currentStaffId', phone);
+    const status = userData.status || "registered";
+    const mockLink = userData.mock_link;
 
-                // সঠিক রিডাইরেক্ট লজিক
-                if (mockLink || status === "mock_scheduled" || status === "exam_completed") {
-                    window.location.href = `mock-test.html?phone=${phone}`;
-                } 
-                else if (status === "registered" || status === "pending") {
-                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-                } 
-                else if (status === "verified") {
-                    window.location.href = `dashboard.html?phone=${phone}`;
-                }
-                else {
-                    window.location.href = "pending.html";
-                }
+    // ১. অগ্রাধিকার: যদি পরীক্ষা শেষ হয় অথবা লিঙ্ক থাকে, তাকে মক টেস্টে পাঠাও
+    if (status === "exam_completed" || status === "mock_scheduled" || mockLink) {
+        window.location.href = `mock-test.html?phone=${phone}`;
+    } 
+    // ২. নতুন ইউজার হলে পরীক্ষা দিতে পাঠাও
+    else if (status === "registered" || status === "pending") {
+        window.location.href = `staff-interview.html?phone=${phone}&expertise=${userData.expertise}`;
+    } 
+    // ৩. ভেরিফাইড হলে ড্যাশবোর্ড
+    else if (status === "verified") {
+        window.location.href = `dashboard.html?phone=${phone}`;
+    }
+    // ৪. বাকি সব ক্ষেত্রে পেন্ডিং (মক টেস্ট শেষ হয়ে গেলে)
+    else {
+        window.location.href = "pending.html";
+    }
+}
             } else {
                 alert("Incorrect Password!");
                 loginBtn.disabled = false;

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Test Session | GORUN</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .mock-card { background: white; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; max-width: 450px; width: 90%; }
+        .status-badge { display: inline-block; padding: 8px 16px; border-radius: 50px; font-weight: bold; font-size: 14px; margin-bottom: 20px; }
+        .pending { background: #fef3c7; color: #92400e; }
+        .active { background: #dcfce7; color: #166534; }
+        .btn-call { display: none; background: #008f51; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 18px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,143,81,0.3); }
+        .timer { font-size: 14px; color: #64748b; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="mock-card">
+    <div id="statusIcon"><i class="fas fa-clock fa-3x" style="color: #64748b; margin-bottom: 20px;"></i></div>
+    <h2 id="mainTitle">Mock Test Preparation</h2>
+    <div id="statusBadge" class="status-badge pending">Awaiting Expert Link</div>
+    
+    <p id="msg" style="color: #475569; line-height: 1.6;">
+        আপনার ইন্টারভিউ স্কোর সাবমিট করা হয়েছে। অ্যাডমিন প্যানেল আপনার জন্য একটি ভিডিও কল সেশন তৈরি করছে। আগামী ২৪ ঘণ্টার মধ্যে এখানে জয়েনিং লিঙ্কটি পাবেন।
+    </p>
+
+    <a href="#" id="joinBtn" class="btn-call" target="_blank">
+        <i class="fas fa-video"></i> Join Mock Interview
+    </a>
+
+    <div class="timer" id="waitTime">Checking for updates...</div>
+</div>
+
+<script src="../config.js"></script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const phone = urlParams.get('phone') || localStorage.getItem('currentStaffId');
+    const rdb = firebase.database();
+
+    function listenForLink() {
+        if (!phone) return alert("Session Error!");
+
+        // Realtime Listener: অ্যাডমিন লিঙ্ক বসানো মাত্রই এটি কাজ করবে
+        rdb.ref('gorun_staffs/' + phone).on('value', (snapshot) => {
+            const data = snapshot.val();
+            
+            if (data && data.mock_link) {
+                // লিঙ্ক পাওয়া গেলে
+                document.getElementById('statusBadge').innerText = "Live Now";
+                document.getElementById('statusBadge').className = "status-badge active";
+                document.getElementById('statusIcon').innerHTML = '<i class="fas fa-video fa-3x" style="color: #008f51; margin-bottom: 20px;"></i>';
+                document.getElementById('mainTitle').innerText = "Session is Ready!";
+                document.getElementById('msg').innerText = "আপনার মক টেস্ট সেশনটি এখন শুরু হয়েছে। নিচের বাটনে ক্লিক করে ভিডিও কলে জয়েন করুন।";
+                
+                const joinBtn = document.getElementById('joinBtn');
+                joinBtn.style.display = 'inline-block';
+                joinBtn.href = data.mock_link;
+                
+                document.getElementById('waitTime').innerText = "Expert is waiting for you.";
+                
+                // ব্রাউজার নোটিফিকেশন (যদি পারমিশন থাকে)
+                if (Notification.permission === "granted") {
+                    new Notification("GORUN: Your Mock Test Link is Ready!");
+                }
+            } else {
+                document.getElementById('waitTime').innerText = "Next Update: within 24 hours";
+            }
+        });
+    }
+
+    // নোটিফিকেশন পারমিশন চাওয়া
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
+
+    window.onload = listenForLink;
+</script>
+</body>
+</html>

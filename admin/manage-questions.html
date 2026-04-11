@@ -2,68 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Question Manager | GORUN Admin</title>
+    <title>Admin Dashboard | GORUN</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 40px; }
-        .admin-card { background: white; max-width: 600px; margin: auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        h2 { color: #0f172a; border-bottom: 2px solid #008f51; padding-bottom: 10px; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .admin-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h2, h3 { color: #0f172a; border-left: 4px solid #008f51; padding-left: 10px; margin-top: 0; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
-        .btn-add { width: 100%; padding: 15px; background: #008f51; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-add:hover { background: #007542; }
+        label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #64748b; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-add { background: #008f51; color: white; }
+        .btn-send { background: #0f172a; color: white; margin-top: 10px; }
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-<div class="admin-card">
-    <h2>Add New Assessment Question</h2>
-    
-    <div class="form-group">
-        <label>SELECT CATEGORY</label>
-        <select id="cat">
-            <option value="student_counselor">Student Counselor</option>
-            <option value="visa_expert">Visa Documentation Expert</option>
-            <option value="compliance_expert">Compliance (Study Abroad)</option>
-            <option value="admission_specialist">University Admission Specialist</option>
-            <option value="language_trainer">IELTS / English Trainer</option>
-            <option value="software_dev">Software Developer</option>
-            <option value="data_entry">Data Entry Operator</option>
-            <option value="excel_expert">Excel & Data Analyst</option>
-            <option value="it_support">IT Support Technician</option>
-            <option value="graphics_designer">Graphics Designer</option>
-            <option value="sales_marketing">Sales & Marketing</option>
-            <option value="call_center">Call Centre Agent</option>
-            <option value="digital_marketer">Digital Marketing Expert</option>
-            <option value="social_media_manager">Social Media Manager</option>
-            <option value="bde_partner_manager">Business Development (B2B)</option>
-            <option value="office_admin">Office Administrator</option>
-            <option value="accounts_payroll">Accounts & Payroll</option>
-            <option value="hr_manager">HR Manager</option>
-            <option value="field_officer">Logistics / Field Officer</option>
-            <option value="content_writer">Content Writer / SOP Specialist</option>
-        </select>
+<div class="container">
+    <div class="admin-card">
+        <h3>Schedule Mock Interview</h3>
+        <div class="form-group">
+            <label>Staff Phone Number</label>
+            <input type="tel" id="targetStaffPhone" placeholder="e.g. 017XXXXXXXX">
+        </div>
+        <div class="form-group">
+            <label>Video Call Link (Meet/Zoom)</label>
+            <input type="url" id="meetLink" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+        </div>
+        <button class="btn btn-send" onclick="sendMockLink()">Send Link to Staff</button>
     </div>
 
-    <div class="form-group">
-        <label>QUESTION TEXT</label>
-        <textarea id="qText" rows="3" placeholder="Enter your question here..."></textarea>
+    <div class="admin-card">
+        <h2>Assessment Question Pool</h2>
+        
+        <div class="form-group">
+            <label>Select Category</label>
+            <select id="cat">
+                <option value="student_counselor">Student Counselor</option>
+                <option value="visa_expert">Visa Documentation Expert</option>
+                <option value="compliance_expert">Compliance (Study Abroad)</option>
+                <option value="admission_specialist">University Admission Specialist</option>
+                <option value="language_trainer">IELTS / English Trainer</option>
+                <option value="software_dev">Software Developer</option>
+                <option value="data_entry">Data Entry Operator</option>
+                <option value="excel_expert">Excel & Data Analyst</option>
+                <option value="it_support">IT Support Technician</option>
+                <option value="graphics_designer">Graphics Designer</option>
+                <option value="sales_marketing">Sales & Marketing</option>
+                <option value="call_center" selected>Call Centre Agent</option>
+                <option value="digital_marketer">Digital Marketing Expert</option>
+                <option value="social_media_manager">Social Media Manager</option>
+                <option value="bde_partner_manager">Business Development (B2B)</option>
+                <option value="office_admin">Office Administrator</option>
+                <option value="accounts_payroll">Accounts & Payroll</option>
+                <option value="hr_manager">HR Manager</option>
+                <option value="field_officer">Logistics / Field Officer</option>
+                <option value="content_writer">Content Writer / SOP Specialist</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Question Text</label>
+            <textarea id="qText" rows="3" placeholder="Enter question..."></textarea>
+        </div>
+
+        <div class="form-group"><label>Option 1</label><input type="text" id="opt1"></div>
+        <div class="form-group"><label>Option 2</label><input type="text" id="opt2"></div>
+        <div class="form-group"><label>Option 3</label><input type="text" id="opt3"></div>
+
+        <div class="form-group">
+            <label>Correct Option</label>
+            <select id="correctIndex">
+                <option value="0">Option 1</option>
+                <option value="1">Option 2</option>
+                <option value="2">Option 3</option>
+            </select>
+        </div>
+
+        <button id="addBtn" class="btn btn-add" onclick="saveQuestion()">Add to Question Pool</button>
     </div>
-
-    <div class="form-group"><label>OPTION 1</label><input type="text" id="opt1"></div>
-    <div class="form-group"><label>OPTION 2</label><input type="text" id="opt2"></div>
-    <div class="form-group"><label>OPTION 3</label><input type="text" id="opt3"></div>
-
-    <div class="form-group">
-        <label>CORRECT OPTION</label>
-        <select id="correctIndex">
-            <option value="0">Option 1</option>
-            <option value="1">Option 2</option>
-            <option value="2">Option 3</option>
-        </select>
-    </div>
-
-    <button id="addBtn" class="btn-add" onclick="saveQuestion()">Add to Question Pool</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -71,11 +89,27 @@
 <script src="../config.js"></script> 
 
 <script>
-    // Realtime Database রেফারেন্স
     const rdb = firebase.database();
 
+    // মক লিঙ্ক পাঠানোর ফাংশন
+    function sendMockLink() {
+        const phone = document.getElementById('targetStaffPhone').value;
+        const link = document.getElementById('meetLink').value;
+
+        if(!phone || !link) return alert("Please provide both phone and link!");
+
+        rdb.ref('gorun_staffs/' + phone).update({
+            mock_link: link,
+            status: "mock_scheduled"
+        }).then(() => {
+            alert("Success! The staff will see the 'Join' button instantly.");
+            document.getElementById('meetLink').value = "";
+        }).catch(e => alert("Error: " + e.message));
+    }
+
+    // প্রশ্ন সেভ করার ফাংশন
     function saveQuestion() {
-        const category = document.getElementById('cat').value; // 'cat' আইডি ব্যবহার করা হয়েছে
+        const category = document.getElementById('cat').value;
         const questionText = document.getElementById('qText').value;
         const o1 = document.getElementById('opt1').value;
         const o2 = document.getElementById('opt2').value;
@@ -83,15 +117,11 @@
         const correct = document.getElementById('correctIndex').value;
         const btn = document.getElementById('addBtn');
 
-        if(!questionText || !o1 || !o2 || !o3) {
-            return alert("সবগুলো ঘর পূরণ করুন!");
-        }
+        if(!questionText || !o1 || !o2 || !o3) return alert("সবগুলো ঘর পূরণ করুন!");
 
         btn.disabled = true;
         btn.innerText = "Saving...";
 
-        // Realtime Database এ সেভ করার লজিক
-        // পাথ: questions / category_name / unique_id
         const newPostRef = rdb.ref('questions/' + category).push();
         
         newPostRef.set({
@@ -101,8 +131,7 @@
             createdAt: new Date().toISOString()
         })
         .then(() => {
-            alert("Question Added Successfully to Realtime Database!");
-            // ফর্ম ক্লিয়ার করা
+            alert("Question Added Successfully!");
             document.getElementById('qText').value = "";
             document.getElementById('opt1').value = "";
             document.getElementById('opt2').value = "";
@@ -113,7 +142,6 @@
         .catch(err => {
             alert("Error: " + err.message);
             btn.disabled = false;
-            btn.innerText = "Add to Question Pool";
         });
     }
 </script>

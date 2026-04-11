@@ -49,37 +49,28 @@ async function loginStaff() {
             const userData = snapshot.val();
             
             if (userData.password === pass) {
-    localStorage.setItem('currentStaffId', phone);
-    
-    const status = userData.status || "registered";
-    const expertise = userData.expertise;
-    const mockLink = userData.mock_link;
+                localStorage.setItem('currentStaffId', phone);
+                
+                const status = userData.status || "registered";
+                const expertise = userData.expertise;
+                const mockLink = userData.mock_link;
 
-    // --- STEP 4: ভেরিফাইড (সরাসরি ড্যাশবোর্ড) ---
-    if (status === "verified") {
-        window.location.href = `dashboard.html?phone=${phone}`;
-    }
-    
-    // --- STEP 3: মক টেস্ট শেষ কিন্তু অ্যাডমিন ভেরিফিকেশন বাকি ---
-    else if (status === "mock_completed" || status === "pending_review") {
-        window.location.href = "pending.html"; // এখানে তাকে 'Under Review' মেসেজ দেখাবে
-    }
-
-    // --- STEP 2: যারা পরীক্ষা শেষ করেছে (মক টেস্টের জন্য ওয়েটিং রুম) ---
-    else if (status === "exam_completed" || status === "pending" || status === "mock_scheduled" || mockLink) {
-        window.location.href = `mock-test.html?phone=${phone}`;
-    } 
-    
-    // --- STEP 1: একদম নতুন ইউজার (পরীক্ষা বাকি) ---
-    else if (status === "registered") {
-        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-    } 
-
-    // সেফটি হিসেবে
-    else {
-        window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
-    }
-}
+                // লজিক অনুযায়ী রিডাইরেক্ট:
+                if (status === "verified") {
+                    window.location.href = `dashboard.html?phone=${phone}`;
+                }
+                else if (status === "mock_completed" || status === "pending_review") {
+                    window.location.href = "pending.html"; 
+                }
+                else if (status === "exam_completed" || status === "pending" || status === "mock_scheduled" || mockLink) {
+                    window.location.href = `mock-test.html?phone=${phone}`;
+                } 
+                else if (status === "registered") {
+                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                } 
+                else {
+                    window.location.href = `staff-interview.html?phone=${phone}&expertise=${expertise}`;
+                }
             } else {
                 alert("Incorrect Password!");
                 loginBtn.disabled = false;
@@ -98,7 +89,6 @@ async function loginStaff() {
     }
 }
 </script>
-
 
 
 </body>
